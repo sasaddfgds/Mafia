@@ -213,10 +213,11 @@
             }, 5000);
         }
 
-        // Получение ссылки на документ комнаты
         function getRoomRef(roomId) {
-            return doc(db, 'artifacts', currentAppId, 'public', 'data', roomId);
-        }
+    // Мы используем 2 сегмента: коллекция 'rooms' и документ 'ID_комнаты'
+    // Это всегда четное число (2), и это будет работать!
+    return doc(db, 'rooms', roomId);
+}
 
         // Запись состояния в базу
         async function saveData(newGameData) { 
