@@ -36,6 +36,16 @@
         .toast-notify {
             animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             box-shadow: 0 10px 30px -5px rgba(0,0,0,0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .toast-title {
+            font-size: 8px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            font-weight: 900;
+            opacity: 0.7;
+            margin-bottom: 3px;
         }
 
         @keyframes slideIn {
@@ -273,23 +283,30 @@
             unsubscribeSnapshot: null
         };
 
-        let lastPhaseMessage = "";
+        let renderedHistoryCount = 0;
         let showScenarioUI = false; // Состояние отображения сценария
 
         window.showToast = function(message, type = 'info') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
-            
-            let bg = "bg-zinc-900 border-zinc-700 text-zinc-200";
-            if (type === 'danger') bg = "bg-red-950 border-red-800 text-red-200 shadow-red-900/20";
-            if (type === 'success') bg = "bg-green-950 border-green-800 text-green-200";
-            if (type === 'special') bg = "bg-indigo-950 border-indigo-800 text-indigo-100";
-            
-            toast.className = `toast-notify px-6 py-4 rounded-2xl text-[11px] font-black border-2 ${bg}`;
+
+            const variants = {
+                info: { bg: "bg-zinc-900/95 border-zinc-700 text-zinc-200", icon: "🔔", title: "Событие" },
+                phase: { bg: "bg-indigo-950/95 border-indigo-800 text-indigo-100 shadow-indigo-900/30", icon: "🌙", title: "Фаза" },
+                success: { bg: "bg-green-950/95 border-green-800 text-green-200", icon: "✔", title: "Успех" },
+                danger: { bg: "bg-red-950/95 border-red-800 text-red-200 shadow-red-900/30", icon: "💀", title: "Тревога" },
+                special: { bg: "bg-purple-950/95 border-purple-800 text-purple-100", icon: "✨", title: "Важно" }
+            };
+
+            const selected = variants[type] || variants.info;
+            toast.className = `toast-notify px-5 py-4 rounded-2xl text-[11px] font-black border-2 ${selected.bg}`;
             toast.innerHTML = `
-                <div class="flex items-start gap-4">
-                    <span>${type === 'danger' ? '💀' : (type === 'success' ? '✔' : '🔔')}</span>
-                    <div class="uppercase tracking-widest">${message}</div>
+                <div class="flex items-start gap-3">
+                    <span class="text-base mt-[1px]">${selected.icon}</span>
+                    <div>
+                        <div class="toast-title">${selected.title}</div>
+                        <div class="uppercase tracking-widest leading-relaxed">${message}</div>
+                    </div>
                 </div>
             `;
             
@@ -315,6 +332,34 @@
 
         function getRoomRef(roomId) {
             return doc(db, 'rooms', roomId);
+        }
+
+        function getNextNightRole(game) {
+            const aliveRoles = new Set(game.players.filter(p => p.isAlive).map(p => p.role));
+            if (aliveRoles.has('Мафия') && !game.actions['Мафия']) return 'Мафия';
+            if (aliveRoles.has('Доктор') && !game.actions['Доктор']) return 'Доктор';
+            if (aliveRoles.has('Детектив') && !game.actions['Детектив']) return 'Детектив';
+            return null;
+        }
+
+        function addHistory(game, message) {
+            if (!game.history) game.history = [];
+            if (game.history[game.history.length - 1] !== message) game.history.push(message);
+        }
+
+        function announceNightStart(game) {
+            addHistory(game, "Наступает ночь. Мирные жители спят.");
+            const firstRole = getNextNightRole(game);
+            if (firstRole) addHistory(game, `Просыпается ${firstRole} и выбирает действие.`);
+            else addHistory(game, "Этой ночью никто не просыпается.");
+        }
+
+        function detectToastTypeFromHistory(message) {
+            const lower = message.toLowerCase();
+            if (lower.includes('началась') || lower.includes('победил') || lower.includes('роли распределены')) return 'special';
+            if (lower.includes('изгнан') || lower.includes('мертв') || lower.includes('кроваво') || lower.includes('пал')) return 'danger';
+            if (lower.includes('ночь') || lower.includes('просыпается') || lower.includes('голосовать') || lower.includes('обсуждение')) return 'phase';
+            return 'info';
         }
 
         async function saveData(newGameData) {
@@ -414,6 +459,7 @@
                 }
 
                 await saveData(gameData);
+                renderedHistoryCount = 0;
 
                 state.unsubscribeSnapshot = onSnapshot(docRef, snap => {
                     if (snap.exists()) {
@@ -440,6 +486,31 @@
 
             const me = state.game.players.find(p => p.id === state.userId);
             if (!me) return;
+
+            const log = document.getElementById('game-log');
+            if (renderedHistoryCount === 0 && state.game.history?.length) {
+                log.innerHTML = state.game.history.map(msg => `
+                    <div class="flex gap-3 border-l-2 border-zinc-800 pl-4 py-1">
+                        <span class="text-zinc-700 font-black">#</span>
+                        <span class="leading-relaxed italic">${msg}</span>
+                    </div>
+                `).join('');
+                log.scrollTop = log.scrollHeight;
+                renderedHistoryCount = state.game.history.length;
+            } else if (state.game.history?.length > renderedHistoryCount) {
+                const freshEntries = state.game.history.slice(renderedHistoryCount);
+                freshEntries.forEach(msg => {
+                    log.innerHTML += `
+                        <div class="flex gap-3 border-l-2 border-zinc-800 pl-4 py-1 animate-reveal">
+                            <span class="text-zinc-700 font-black">#</span>
+                            <span class="leading-relaxed italic">${msg}</span>
+                        </div>
+                    `;
+                    showToast(msg, detectToastTypeFromHistory(msg));
+                });
+                log.scrollTop = log.scrollHeight;
+                renderedHistoryCount = state.game.history.length;
+            }
 
             if (state.game.phase === 'lobby') {
                 document.getElementById('lobby-section').classList.remove('hidden');
@@ -487,19 +558,6 @@
 
                 renderGrid(me);
                 renderActions(me);
-                
-                const lastHistory = state.game.history[state.game.history.length - 1];
-                if (lastHistory !== lastPhaseMessage) {
-                    lastPhaseMessage = lastHistory;
-                    const log = document.getElementById('game-log');
-                    log.innerHTML += `
-                        <div class="flex gap-3 border-l-2 border-zinc-800 pl-4 py-1 animate-reveal">
-                            <span class="text-zinc-700 font-black">#</span>
-                            <span class="leading-relaxed italic">${lastHistory}</span>
-                        </div>
-                    `;
-                    log.scrollTop = log.scrollHeight;
-                }
             }
 
             checkWins();
@@ -591,13 +649,7 @@
             
             // НОЧНЫЕ ДЕЙСТВИЯ
             else if (state.game.phase === 'night') {
-                const nextRole = (function(g) {
-                    const aliveRoles = new Set(g.players.filter(p => p.isAlive).map(p => p.role));
-                    if (aliveRoles.has('Мафия') && !g.actions['Мафия']) return 'Мафия';
-                    if (aliveRoles.has('Доктор') && !g.actions['Доктор']) return 'Доктор';
-                    if (aliveRoles.has('Детектив') && !g.actions['Детектив']) return 'Детектив';
-                    return null;
-                })(state.game);
+                const nextRole = getNextNightRole(state.game);
 
                 if (me.role === nextRole) {
                     instruct.innerText = me.role === 'Мафия' ? "Выберите жертву этой ночи:" : (me.role === 'Доктор' ? "Кого излечим сегодня?" : "Укажите на того, чью роль хотите узнать:");
@@ -649,17 +701,12 @@
                     showToast(`${target.name} - ${target.role === 'Мафия' ? 'МАФИЯ!' : 'Мирный житель'}`, target.role === 'Мафия' ? 'danger' : 'success');
                 }
 
-                const nextRole = (function(g) {
-                    const aliveRoles = new Set(g.players.filter(p => p.isAlive).map(p => p.role));
-                    if (aliveRoles.has('Мафия') && !g.actions['Мафия']) return 'Мафия';
-                    if (aliveRoles.has('Доктор') && !g.actions['Доктор']) return 'Доктор';
-                    if (aliveRoles.has('Детектив') && !g.actions['Детектив']) return 'Детектив';
-                    return null;
-                })(game);
+                const nextRole = getNextNightRole(game);
 
                 if (!nextRole) {
                     resolveNight(game);
                 } else {
+                    addHistory(game, `Просыпается ${nextRole} и выбирает действие.`);
                     await saveData(game);
                 }
             } else if (game.phase === 'day') {
@@ -684,9 +731,9 @@
             }
 
             if (killedPlayer) {
-                game.history.push(`Ночь прошла кроваво. Найден мертвым: ${killedPlayer.name}.`);
+                addHistory(game, `Ночь прошла кроваво. Найден мертвым: ${killedPlayer.name}.`);
             } else {
-                game.history.push("Ночь прошла на удивление спокойно. Жертв нет.");
+                addHistory(game, "Ночь прошла на удивление спокойно. Жертв нет.");
             }
 
             game.phase = 'discussion';
@@ -694,6 +741,7 @@
             game.turnEndTime = Date.now() + 60000;
             game.actions = {};
             game.votes = {};
+            addHistory(game, "Город просыпается. Начинается обсуждение.");
             saveData(game);
         }
 
@@ -718,14 +766,15 @@
             if (candidates.length === 1) {
                 const target = game.players.find(p => p.id === candidates[0]);
                 game.players = game.players.map(p => p.id === target.id ? { ...p, isAlive: false } : p);
-                game.history.push(`Городской суд вынес приговор. ${target.name} был изгнан. Его роль: ${target.role}.`);
+                addHistory(game, `Городской суд вынес приговор. ${target.name} был изгнан. Его роль: ${target.role}.`);
             } else {
-                game.history.push("Городской совет не пришел к единому мнению. Никто не был наказан.");
+                addHistory(game, "Городской совет не пришел к единому мнению. Никто не был наказан.");
             }
 
             game.phase = 'night';
             game.actions = {};
             game.votes = {};
+            announceNightStart(game);
             await saveData(game);
         }
 
@@ -740,11 +789,12 @@
             if (game.speakerIndex >= game.players.length) {
                 if (game.phase === 'introduction') {
                     game.phase = 'night';
-                    game.history.push("Знакомство окончено. Город погружается во тьму.");
+                    addHistory(game, "Знакомство окончено. Город погружается во тьму.");
+                    announceNightStart(game);
                 } else {
                     game.phase = 'day';
                     game.turnEndTime = Date.now() + 120000;
-                    game.history.push("Обсуждение окончено. Время голосовать.");
+                    addHistory(game, "Обсуждение окончено. Время голосовать.");
                 }
                 game.actions = {};
                 game.votes = {};
@@ -766,7 +816,8 @@
             game.phase = 'introduction';
             game.speakerIndex = 0;
             game.turnEndTime = Date.now() + 60000;
-            game.history.push("Город проснулся. Время знакомства!");
+            addHistory(game, "Игра началась! Роли распределены.");
+            addHistory(game, "Город проснулся. Время знакомства!");
             await saveData(game);
         }
 
