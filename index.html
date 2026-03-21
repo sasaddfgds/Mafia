@@ -34,9 +34,22 @@
         }
 
         .toast-notify {
-            animation: slideIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
             box-shadow: 0 10px 30px -5px rgba(0,0,0,0.8);
             backdrop-filter: blur(10px);
+            opacity: 0;
+            transform: translateX(24px) scale(0.98);
+            transition: opacity 0.28s ease, transform 0.28s ease;
+            will-change: opacity, transform;
+        }
+
+        .toast-notify.show {
+            opacity: 1;
+            transform: translateX(0) scale(1);
+        }
+
+        .toast-notify.hide {
+            opacity: 0;
+            transform: translateX(18px) scale(0.99);
         }
 
         .toast-title {
@@ -46,11 +59,6 @@
             font-weight: 900;
             opacity: 0.7;
             margin-bottom: 3px;
-        }
-
-        @keyframes slideIn {
-            from { transform: translateX(120%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
         }
 
         .player-card {
@@ -112,31 +120,77 @@
             </div>
         </header>
 
-        <!-- Секция Входа -->
+        <!-- Секция Входа/Регистрации -->
         <section id="auth-section" class="flex flex-col gap-6 max-w-sm mx-auto w-full role-reveal-anim">
             <div class="bg-zinc-900/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl backdrop-blur-md">
-                <div class="space-y-6">
+                <!-- Форма Входа -->
+                <div id="login-form" class="space-y-6">
                     <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Вход в город</p>
                     
                     <div>
-                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Псевдоним</label>
-                        <input type="text" id="username" maxlength="12" placeholder="Как вас звать?" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Email</label>
+                        <input type="email" id="login-email" placeholder="your@email.com" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Код комнаты</label>
-                            <input type="text" id="room-id-input" value="CITY_1" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white text-xs font-mono focus:border-zinc-700 transition-colors uppercase">
-                        </div>
-                        <div>
-                            <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Ваш ключ</label>
-                            <input type="text" id="user-id-input" disabled class="w-full bg-zinc-900/50 border border-zinc-800 p-4 rounded-2xl outline-none text-zinc-600 text-xs font-mono cursor-not-allowed">
-                        </div>
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Пароль</label>
+                        <input type="password" id="login-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Код комнаты</label>
+                        <input type="text" id="room-id-input" value="CITY_1" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white text-xs font-mono focus:border-zinc-700 transition-colors uppercase">
                     </div>
                     
-                    <button id="join-btn" onclick="joinRoom()" disabled class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
-                        <span id="join-btn-text">Синхронизация...</span>
+                    <button onclick="handleLogin()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
+                        Войти
                     </button>
+
+                    <div class="text-center">
+                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
+                            Нет аккаунта? Создать
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Форма Регистрации (скрыта по умолчанию) -->
+                <div id="register-form" class="hidden space-y-6">
+                    <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Регистрация</p>
+                    
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Псевдоним</label>
+                        <input type="text" id="register-username" maxlength="12" placeholder="Как вас звать?" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Email</label>
+                        <input type="email" id="register-email" placeholder="your@email.com" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Пароль</label>
+                        <input type="password" id="register-password" placeholder="Минимум 6 символов" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Подтвердите пароль</label>
+                        <input type="password" id="register-confirm-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
+                    </div>
+
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Код комнаты</label>
+                        <input type="text" id="register-room-id" value="CITY_1" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white text-xs font-mono focus:border-zinc-700 transition-colors uppercase">
+                    </div>
+                    
+                    <button onclick="handleRegister()" class="btn-action w-full bg-white hover:bg-zinc-200 text-black font-black py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-xs flex justify-center items-center gap-3 border-b-4 border-zinc-300">
+                        Создать аккаунт
+                    </button>
+
+                    <div class="text-center">
+                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
+                            Уже есть аккаунт? Войти
+                        </button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -212,7 +266,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, getDoc, onSnapshot, getDocs, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // --- БАЗЫ ДАННЫХ ДЛЯ СЦЕНАРИЕВ ---
@@ -286,8 +340,19 @@
         let renderedHistoryCount = 0;
         let showScenarioUI = false; // Состояние отображения сценария
         let lastPrivateToastKey = "";
+        let toastQueue = [];
+        let toastIsShowing = false;
 
         window.showToast = function(message, type = 'info') {
+            toastQueue.push({ message, type });
+            processToastQueue();
+        }
+
+        function processToastQueue() {
+            if (toastIsShowing || toastQueue.length === 0) return;
+
+            toastIsShowing = true;
+            const { message, type } = toastQueue.shift();
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');
 
@@ -313,10 +378,18 @@
             `;
             
             container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+
             setTimeout(() => {
-                toast.style.opacity = '0';
-                setTimeout(() => toast.remove(), 500);
-            }, 6000);
+                toast.classList.remove('show');
+                toast.classList.add('hide');
+
+                setTimeout(() => {
+                    toast.remove();
+                    toastIsShowing = false;
+                    processToastQueue();
+                }, 320);
+            }, 3000);
         }
 
         async function cleanupOldRooms() {
@@ -385,15 +458,20 @@
         }
 
         async function init() {
-            onAuthStateChanged(auth, user => {
+            onAuthStateChanged(auth, async user => {
                 if (user) {
                     state.userId = user.uid;
-                    document.getElementById('user-id-input').value = user.uid.substr(0, 10).toUpperCase();
-                    document.getElementById('join-btn').disabled = false;
-                    document.getElementById('join-btn-text').innerText = "Войти в игру";
+                    // Получаем username из Firestore или из displayName
+                    const userDoc = await getDoc(doc(db, 'users', user.uid));
+                    if (userDoc.exists()) {
+                        window.currentUsername = userDoc.data().username || user.displayName || 'Игрок';
+                    } else {
+                        window.currentUsername = user.displayName || 'Игрок';
+                    }
                     document.getElementById('loading-overlay').classList.add('hidden');
                 } else {
-                    signInAnonymously(auth);
+                    // Пользователь не авторизован - показываем форму
+                    document.getElementById('loading-overlay').classList.add('hidden');
                 }
             });
 
@@ -434,11 +512,11 @@
             }, 1000);
         }
 
-        window.joinRoom = async function() {
-            const name = document.getElementById('username').value.trim();
-            const rid = document.getElementById('room-id-input').value.trim();
+        window.joinRoom = async function(roomIdFromForm) {
+            const name = window.currentUsername || 'Игрок';
+            const rid = roomIdFromForm || document.getElementById('room-id-input')?.value?.trim();
 
-            if (!name || !rid) return showToast("Укажите ник и код", "danger");
+            if (!rid) return showToast("Укажите код комнаты", "danger");
             
             state.roomID = 'ROOM_' + rid.toUpperCase();
             const docRef = getRoomRef(state.roomID);
@@ -495,6 +573,138 @@
 
             } catch (e) {
                 showToast("Ошибка сети", "danger");
+            }
+        }
+
+        // Переключение между формами входа и регистрации
+        window.toggleAuthMode = function() {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            
+            if (loginForm.classList.contains('hidden')) {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+            }
+        }
+
+        // Обработка входа
+        window.handleLogin = async function() {
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+            const roomId = document.getElementById('room-id-input').value.trim();
+
+            if (!email || !password) {
+                showToast("Введите email и пароль", "danger");
+                return;
+            }
+
+            if (!roomId) {
+                showToast("Укажите код комнаты", "danger");
+                return;
+            }
+
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                state.userId = userCredential.user.uid;
+                
+                // Получаем username из Firestore
+                const userDoc = await getDoc(doc(db, 'users', state.userId));
+                if (userDoc.exists()) {
+                    window.currentUsername = userDoc.data().username || userCredential.user.displayName || 'Игрок';
+                } else {
+                    window.currentUsername = userCredential.user.displayName || 'Игрок';
+                }
+                
+                showToast("Вход выполнен успешно", "success");
+                
+                // Автоматически входим в комнату
+                await joinRoom(roomId);
+            } catch (error) {
+                let errorMsg = "Ошибка входа";
+                switch (error.code) {
+                    case 'auth/user-not-found':
+                        errorMsg = "Пользователь не найден";
+                        break;
+                    case 'auth/wrong-password':
+                        errorMsg = "Неверный пароль";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMsg = "Некорректный email";
+                        break;
+                    case 'auth/too-many-requests':
+                        errorMsg = "Слишком много попыток. Попробуйте позже";
+                        break;
+                }
+                showToast(errorMsg, "danger");
+            }
+        }
+
+        // Обработка регистрации
+        window.handleRegister = async function() {
+            const username = document.getElementById('register-username').value.trim();
+            const email = document.getElementById('register-email').value.trim();
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            const roomId = document.getElementById('register-room-id').value.trim();
+
+            // Валидация
+            if (!username || !email || !password) {
+                showToast("Заполните все поля", "danger");
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast("Пароль должен быть минимум 6 символов", "danger");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast("Пароли не совпадают", "danger");
+                return;
+            }
+
+            if (!roomId) {
+                showToast("Укажите код комнаты", "danger");
+                return;
+            }
+
+            try {
+                // Создаем пользователя
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                state.userId = userCredential.user.uid;
+                
+                // Сохраняем username в Firestore
+                await setDoc(doc(db, 'users', state.userId), {
+                    username: username,
+                    email: email,
+                    createdAt: Date.now()
+                });
+                
+                // Обновляем displayName в Auth
+                await updateProfile(userCredential.user, { displayName: username });
+                
+                window.currentUsername = username;
+                showToast("Аккаунт создан", "success");
+                
+                // Автоматически входим в комнату
+                await joinRoom(roomId);
+            } catch (error) {
+                let errorMsg = "Ошибка регистрации";
+                switch (error.code) {
+                    case 'auth/email-already-in-use':
+                        errorMsg = "Этот email уже используется";
+                        break;
+                    case 'auth/invalid-email':
+                        errorMsg = "Некорректный email";
+                        break;
+                    case 'auth/weak-password':
+                        errorMsg = "Слабый пароль (минимум 6 символов)";
+                        break;
+                }
+                showToast(errorMsg, "danger");
             }
         }
 
