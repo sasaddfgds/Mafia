@@ -110,8 +110,17 @@
     </div>
 
     <div id="app" class="max-w-2xl mx-auto w-full p-4 flex-grow flex flex-col relative z-10 pb-44">
-        <header class="py-10 text-center">
+        <header class="py-10 text-center relative">
             <h1 class="text-7xl gothic-font text-red-800 mb-2 drop-shadow-[0_0_15px_rgba(153,27,27,0.4)]">Mafia</h1>
+            
+            <!-- User Info в правом верхнем углу -->
+            <div id="user-header" class="hidden absolute top-0 right-0 flex items-center gap-3">
+                <span id="header-username" class="text-[11px] font-black text-zinc-400 tracking-widest">---</span>
+                <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center hover:border-red-900/50 transition-colors">
+                    <span class="text-zinc-500">⚙️</span>
+                </button>
+            </div>
+
             <div id="room-controls" class="hidden flex flex-col items-center gap-2">
                 <div id="room-badge" class="inline-flex flex-col items-center gap-1 px-6 py-2 rounded-2xl bg-zinc-900/80 border border-zinc-800 text-[9px] uppercase tracking-[0.2em] text-zinc-400">
                     <div>ГОРОД: <span id="display-room-id" class="text-red-600 font-black">---</span></div>
@@ -135,11 +144,6 @@
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Пароль</label>
                         <input type="password" id="login-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
-                    </div>
-
-                    <div>
-                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Код комнаты</label>
-                        <input type="text" id="room-id-input" value="CITY_1" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white text-xs font-mono focus:border-zinc-700 transition-colors uppercase">
                     </div>
                     
                     <button onclick="handleLogin()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
@@ -176,11 +180,6 @@
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Подтвердите пароль</label>
                         <input type="password" id="register-confirm-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-
-                    <div>
-                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Код комнаты</label>
-                        <input type="text" id="register-room-id" value="CITY_1" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white text-xs font-mono focus:border-zinc-700 transition-colors uppercase">
-                    </div>
                     
                     <button onclick="handleRegister()" class="btn-action w-full bg-white hover:bg-zinc-200 text-black font-black py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-xs flex justify-center items-center gap-3 border-b-4 border-zinc-300">
                         Создать аккаунт
@@ -194,6 +193,72 @@
                 </div>
             </div>
         </section>
+
+        <!-- Главное меню (после авторизации) -->
+        <section id="main-menu-section" class="hidden flex flex-col gap-6 max-w-sm mx-auto w-full role-reveal-anim">
+            <div class="bg-zinc-900/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl backdrop-blur-md">
+                <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Добро пожаловать в город</p>
+                
+                <!-- Список активных комнат -->
+                <div class="space-y-3 mb-6">
+                    <p class="text-[9px] uppercase font-black text-zinc-600 ml-3 tracking-widest">Активные комнаты</p>
+                    <div id="active-rooms-list" class="space-y-2 max-h-40 overflow-y-auto scrollbar-hide">
+                        <p class="text-[10px] text-zinc-700 text-center py-4 italic">Нет активных комнат</p>
+                    </div>
+                </div>
+
+                <div class="border-t border-zinc-800/50 pt-6 space-y-4">
+                    <div>
+                        <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Войти в комнату</label>
+                        <input type="text" id="main-menu-room-input" placeholder="Введите код..." class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold text-xs font-mono uppercase">
+                    </div>
+                    
+                    <button onclick="handleJoinFromMainMenu()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
+                        Войти в город
+                    </button>
+                </div>
+
+                <div class="mt-6 pt-6 border-t border-zinc-800/50 text-center">
+                    <button onclick="handleLogout()" class="text-[9px] text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
+                        Выйти из аккаунта
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Модал настроек -->
+        <div id="settings-modal" class="hidden fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+            <div class="bg-zinc-900/95 border border-zinc-800 rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-[12px] font-black text-zinc-400 uppercase tracking-widest">Настройки</h3>
+                    <button onclick="closeSettings()" class="w-8 h-8 rounded-xl bg-zinc-800/50 flex items-center justify-center hover:bg-zinc-700 transition-colors">
+                        <span class="text-zinc-500 text-[10px]">✕</span>
+                    </button>
+                </div>
+                
+                <div class="space-y-6">
+                    <!-- Аватарка (заглушка) -->
+                    <div class="flex items-center gap-4 p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-2xl">
+                            👤
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Аватарка</p>
+                            <p class="text-[9px] text-zinc-600">Скоро будет доступно</p>
+                        </div>
+                    </div>
+
+                    <!-- Тема (заглушка) -->
+                    <div class="flex items-center justify-between p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+                        <div>
+                            <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Тема оформления</p>
+                            <p class="text-[9px] text-zinc-600">Скоро будет доступно</p>
+                        </div>
+                        <div class="w-12 h-6 bg-zinc-800 rounded-full opacity-50 cursor-not-allowed"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Секция Лобби -->
         <section id="lobby-section" class="hidden flex flex-col gap-6 role-reveal-anim">
@@ -405,6 +470,60 @@
             } catch(e) {}
         }
 
+        // Очистка лобби с менее чем 3 игроками
+        async function cleanupSmallLobbies() {
+            try {
+                const roomsSnap = await getDocs(collection(db, 'rooms'));
+                roomsSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    // Удаляем лобби если меньше 3 игроков и фаза lobby
+                    if (data.phase === 'lobby' && (!data.players || data.players.length < 3)) {
+                        deleteDoc(doc(db, 'rooms', docSnap.id));
+                        console.log(`Deleted small lobby: ${docSnap.id} (${data.players?.length || 0} players)`);
+                    }
+                });
+            } catch(e) {
+                console.error('Error cleaning up small lobbies:', e);
+            }
+        }
+
+        // Запускаем очистку каждый час
+        setInterval(cleanupSmallLobbies, 60 * 60 * 1000);
+        // И сразу при загрузке
+        cleanupSmallLobbies();
+
+        // Очистка неактивных комнат (не в фазе lobby)
+        async function cleanupInactiveRooms() {
+            try {
+                const roomsSnap = await getDocs(collection(db, 'rooms'));
+                const now = Date.now();
+                roomsSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    // Удаляем если фаза не lobby (игра идет или закончилась)
+                    // или если нет активности более 2 часов
+                    const lastActivity = data.turnEndTime || data.createdAt || 0;
+                    const inactiveTime = now - lastActivity;
+                    
+                    if (data.phase !== 'lobby' && data.phase !== 'waiting') {
+                        // Удаляем комнаты где игра уже идет или закончилась
+                        deleteDoc(doc(db, 'rooms', docSnap.id));
+                        console.log(`Deleted inactive game room: ${docSnap.id} (phase: ${data.phase})`);
+                    } else if (inactiveTime > 2 * 60 * 60 * 1000) {
+                        // Удаляем если нет активности более 2 часов
+                        deleteDoc(doc(db, 'rooms', docSnap.id));
+                        console.log(`Deleted stale room: ${docSnap.id} (inactive for ${Math.round(inactiveTime/60000)} min)`);
+                    }
+                });
+            } catch(e) {
+                console.error('Error cleaning up inactive rooms:', e);
+            }
+        }
+
+        // Запускаем очистку каждые 30 минут
+        setInterval(cleanupInactiveRooms, 30 * 60 * 1000);
+        // И сразу при загрузке
+        cleanupInactiveRooms();
+
         function getRoomRef(roomId) {
             return doc(db, 'rooms', roomId);
         }
@@ -468,9 +587,24 @@
                     } else {
                         window.currentUsername = user.displayName || 'Игрок';
                     }
+                    
+                    // Обновляем UI хедера
+                    document.getElementById('header-username').innerText = window.currentUsername;
+                    document.getElementById('user-header').classList.remove('hidden');
+                    
+                    // Показываем главное меню
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('main-menu-section').classList.remove('hidden');
+                    
+                    // Загружаем активные комнаты
+                    await fetchActiveRooms();
+                    
                     document.getElementById('loading-overlay').classList.add('hidden');
                 } else {
                     // Пользователь не авторизован - показываем форму
+                    document.getElementById('auth-section').classList.remove('hidden');
+                    document.getElementById('main-menu-section').classList.add('hidden');
+                    document.getElementById('user-header').classList.add('hidden');
                     document.getElementById('loading-overlay').classList.add('hidden');
                 }
             });
@@ -568,6 +702,7 @@
                 });
 
                 document.getElementById('auth-section').classList.add('hidden');
+                document.getElementById('main-menu-section').classList.add('hidden');
                 document.getElementById('room-controls').classList.remove('hidden');
                 document.getElementById('display-room-id').innerText = rid.toUpperCase();
 
@@ -594,34 +729,16 @@
         window.handleLogin = async function() {
             const email = document.getElementById('login-email').value.trim();
             const password = document.getElementById('login-password').value;
-            const roomId = document.getElementById('room-id-input').value.trim();
 
             if (!email || !password) {
                 showToast("Введите email и пароль", "danger");
                 return;
             }
 
-            if (!roomId) {
-                showToast("Укажите код комнаты", "danger");
-                return;
-            }
-
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                state.userId = userCredential.user.uid;
-                
-                // Получаем username из Firestore
-                const userDoc = await getDoc(doc(db, 'users', state.userId));
-                if (userDoc.exists()) {
-                    window.currentUsername = userDoc.data().username || userCredential.user.displayName || 'Игрок';
-                } else {
-                    window.currentUsername = userCredential.user.displayName || 'Игрок';
-                }
-                
+                await signInWithEmailAndPassword(auth, email, password);
                 showToast("Вход выполнен успешно", "success");
-                
-                // Автоматически входим в комнату
-                await joinRoom(roomId);
+                // onAuthStateChanged обработает переключение на главное меню
             } catch (error) {
                 let errorMsg = "Ошибка входа";
                 switch (error.code) {
@@ -648,7 +765,6 @@
             const email = document.getElementById('register-email').value.trim();
             const password = document.getElementById('register-password').value;
             const confirmPassword = document.getElementById('register-confirm-password').value;
-            const roomId = document.getElementById('register-room-id').value.trim();
 
             // Валидация
             if (!username || !email || !password) {
@@ -663,11 +779,6 @@
 
             if (password !== confirmPassword) {
                 showToast("Пароли не совпадают", "danger");
-                return;
-            }
-
-            if (!roomId) {
-                showToast("Укажите код комнаты", "danger");
                 return;
             }
 
@@ -688,9 +799,7 @@
                 
                 window.currentUsername = username;
                 showToast("Аккаунт создан", "success");
-                
-                // Автоматически входим в комнату
-                await joinRoom(roomId);
+                // onAuthStateChanged обработает переключение на главное меню
             } catch (error) {
                 let errorMsg = "Ошибка регистрации";
                 switch (error.code) {
@@ -706,6 +815,87 @@
                 }
                 showToast(errorMsg, "danger");
             }
+        }
+
+        // Загрузка активных комнат
+        async function fetchActiveRooms() {
+            try {
+                const roomsSnap = await getDocs(collection(db, 'rooms'));
+                const rooms = [];
+                roomsSnap.forEach(docSnap => {
+                    const data = docSnap.data();
+                    // Показываем только комнаты в фазе lobby
+                    if (data.phase === 'lobby') {
+                        rooms.push({
+                            id: docSnap.id,
+                            playersCount: data.players?.length || 0,
+                            ...data
+                        });
+                    }
+                });
+                renderActiveRooms(rooms);
+            } catch (e) {
+                console.error('Error fetching rooms:', e);
+            }
+        }
+
+        // Отображение активных комнат
+        function renderActiveRooms(rooms) {
+            const container = document.getElementById('active-rooms-list');
+            if (rooms.length === 0) {
+                container.innerHTML = '<p class="text-[10px] text-zinc-700 text-center py-4 italic">Нет активных комнат</p>';
+                return;
+            }
+            
+            container.innerHTML = rooms.map(room => {
+                const roomCode = room.id.replace('ROOM_', '');
+                return `
+                    <div class="flex items-center justify-between p-3 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
+                        <div class="flex items-center gap-3">
+                            <span class="text-lg">🏛️</span>
+                            <div>
+                                <p class="text-[11px] font-black text-zinc-400">${roomCode}</p>
+                                <p class="text-[9px] text-zinc-600">${room.playersCount}/10 жителей</p>
+                            </div>
+                        </div>
+                        <button onclick="joinRoom('${roomCode}')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-[9px] font-black uppercase text-zinc-300 transition-colors">
+                            Войти
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Вход в комнату из главного меню
+        window.handleJoinFromMainMenu = function() {
+            const roomId = document.getElementById('main-menu-room-input').value.trim();
+            if (!roomId) {
+                showToast("Введите код комнаты", "danger");
+                return;
+            }
+            joinRoom(roomId);
+        }
+
+        // Выход из аккаунта
+        window.handleLogout = async function() {
+            try {
+                await auth.signOut();
+                state.userId = null;
+                window.currentUsername = null;
+                showToast("Вы вышли из аккаунта", "info");
+            } catch (e) {
+                showToast("Ошибка выхода", "danger");
+            }
+        }
+
+        // Открыть настройки
+        window.openSettings = function() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+
+        // Закрыть настройки
+        window.closeSettings = function() {
+            document.getElementById('settings-modal').classList.add('hidden');
         }
 
         window.leaveRoom = function() {
@@ -1114,4 +1304,4 @@
         init();
     </script>
 </body>
-</html>
+</html> 
