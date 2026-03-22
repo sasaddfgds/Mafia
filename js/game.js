@@ -171,7 +171,12 @@ window.joinRoom = async function(roomIdFromForm) {
                 votes: {},
                 speakerIndex: 0,
                 turnEndTime: 0,
-                createdAt: Date.now()
+                createdAt: Date.now(),
+                settings: {
+                    roles: { mafia: 1, doctor: 1, detective: 1 },
+                    timers: { intro: 60, night: 60, discussion: 60, day: 90 },
+                    scenarios: { intro: true, alibi: true }
+                }
             };
         }
 
@@ -223,7 +228,8 @@ function announceNightStart(game) {
     const firstRole = getNextNightRole(game);
     if (firstRole) {
         addHistory(game, `Просыпается ${firstRole} и выбирает действие.`);
-        game.turnEndTime = Date.now() + 60000;
+        const nightTime = game.settings?.timers?.night || 60;
+        game.turnEndTime = Date.now() + nightTime * 1000;
     } else {
         addHistory(game, "Этой ночью никто не просыпается.");
         game.turnEndTime = 0;
@@ -282,6 +288,11 @@ function render() {
 
         document.getElementById('player-count').innerText = `${state.game.players.length}/10`;
         document.getElementById('admin-controls').classList.toggle('hidden', !me.isAdmin);
+        
+        // Load settings to UI if admin
+        if (me.isAdmin) {
+            loadSettingsToUI(state.game.settings);
+        }
         
         document.getElementById('player-list').innerHTML = state.game.players.map(p => `
             <div class="bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/50 flex justify-between items-center">
@@ -361,8 +372,13 @@ function renderActions(me) {
         const currentSpeaker = state.game.players[state.game.speakerIndex];
         
         if (currentSpeaker?.id === state.userId) {
-            // Показываем сценарий если это наш ход и мы еще не показали
-            if (!showScenarioUI) {
+            // Показываем сценарий если включено в настройках
+            const settings = state.game.settings || { scenarios: { intro: true, alibi: true } };
+            const scenariosEnabled = state.game.phase === 'introduction' 
+                ? settings.scenarios?.intro !== false 
+                : settings.scenarios?.alibi !== false;
+            
+            if (scenariosEnabled && !showScenarioUI) {
                 showScenarioUI = true;
                 const scenarios = state.game.phase === 'introduction' ? introScenarios : alibiScenarios;
                 const scenario = scenarios[Math.floor(Math.random() * scenarios.length)];
@@ -376,7 +392,10 @@ function renderActions(me) {
                 container.appendChild(scenarioDiv);
             }
             
-            instruct.innerText = "Ваша очередь говорить. У вас 60 секунд.";
+            const timerValue = state.game.phase === 'introduction'
+                ? (state.game.settings?.timers?.intro || 60)
+                : (state.game.settings?.timers?.discussion || 60);
+            instruct.innerText = `Ваша очередь говорить. У вас ${timerValue} секунд.`;
             const btn = document.createElement('button');
             btn.className = "btn-action w-full py-4 bg-red-900 hover:bg-red-800 text-white rounded-xl text-[10px] font-black uppercase tracking-widest";
             btn.innerText = "Закончить речь";
@@ -393,10 +412,11 @@ function renderActions(me) {
         const isSpecialRole = ['Мафия', 'Доктор', 'Детектив'].includes(me.role);
 
         if (isSpecialRole && nextRole) {
+            const nightTime = state.game.settings?.timers?.night || 60;
             if (me.role === nextRole) {
                 showPrivateToastOnce(
                     `role-turn-${state.game.history.length}-${nextRole}`,
-                    `Ваша очередь: ${nextRole}. У вас 60 секунд на действие.`
+                    `Ваша очередь: ${nextRole}. У вас ${nightTime} секунд на действие.`
                 );
             } else {
                 showPrivateToastOnce(
@@ -463,7 +483,8 @@ window.act = async function(targetId) {
             resolveNight(game);
         } else {
             addHistory(game, `Просыпается ${nextRole} и выбирает действие.`);
-            game.turnEndTime = Date.now() + 60000;
+            const nightTime = game.settings?.timers?.night || 60;
+            game.turnEndTime = Date.now() + nightTime * 1000;
             await saveData(game);
         }
     } else if (game.phase === 'day') {
@@ -495,7 +516,8 @@ function resolveNight(game) {
 
     game.phase = 'discussion';
     game.speakerIndex = 0;
-    game.turnEndTime = Date.now() + 60000;
+    const discussionTime = game.settings?.timers?.discussion || 60;
+    game.turnEndTime = Date.now() + discussionTime * 1000;
     game.actions = {};
     game.votes = {};
     addHistory(game, "Город просыпается. Начинается обсуждение.");
@@ -512,14 +534,16 @@ window.resolveNightTimeout = async function(game) {
     }
 
     updated.actions[nextRole] = 'timeout';
-    addHistory(updated, `${nextRole} не успел сделать выбор за 60 секунд.`);
+    const nightTime = game.settings?.timers?.night || 60;
+    addHistory(updated, `${nextRole} не успел сделать выбор за ${nightTime} секунд.`);
 
     const afterRole = getNextNightRole(updated);
     if (!afterRole) {
         resolveNight(updated);
     } else {
         addHistory(updated, `Просыпается ${afterRole} и выбирает действие.`);
-        updated.turnEndTime = Date.now() + 60000;
+        const nightTime = game.settings?.timers?.night || 60;
+        updated.turnEndTime = Date.now() + nightTime * 1000;
         await saveData(updated);
     }
 };
@@ -572,13 +596,17 @@ window.nextSpeaker = async function() {
             announceNightStart(game);
         } else {
             game.phase = 'day';
-            game.turnEndTime = Date.now() + 120000;
+            const dayTime = game.settings?.timers?.day || 90;
+            game.turnEndTime = Date.now() + dayTime * 1000;
             addHistory(game, "Обсуждение окончено. Время голосовать.");
         }
         game.actions = {};
         game.votes = {};
     } else {
-        game.turnEndTime = Date.now() + 60000;
+        const speakerTime = game.phase === 'introduction' 
+            ? (game.settings?.timers?.intro || 60)
+            : (game.settings?.timers?.discussion || 60);
+        game.turnEndTime = Date.now() + speakerTime * 1000;
     }
     
     showScenarioUI = false;
@@ -587,14 +615,27 @@ window.nextSpeaker = async function() {
 
 window.startGame = async function() {
     let game = { ...state.game };
-    const roles = ['Мафия', 'Доктор', 'Детектив'];
+    const settings = game.settings || { roles: { mafia: 1, doctor: 1, detective: 1 } };
+    
+    // Build roles array based on settings
+    const roles = [];
+    for (let i = 0; i < settings.roles.mafia; i++) roles.push('Мафия');
+    for (let i = 0; i < settings.roles.doctor; i++) roles.push('Доктор');
+    for (let i = 0; i < settings.roles.detective; i++) roles.push('Детектив');
+    
+    // Fill remaining with Житель
     while(roles.length < game.players.length) roles.push('Житель');
+    
     const shuffled = roles.sort(() => Math.random() - 0.5);
 
     game.players = game.players.map((p, i) => ({ ...p, role: shuffled[i], isAlive: true }));
     game.phase = 'introduction';
     game.speakerIndex = 0;
-    game.turnEndTime = Date.now() + 60000;
+    
+    // Use timer from settings
+    const introTime = settings.timers?.intro || 60;
+    game.turnEndTime = Date.now() + introTime * 1000;
+    
     addHistory(game, "Игра началась! Роли распределены.");
     addHistory(game, "Город проснулся. Время знакомства!");
     await saveData(game);
@@ -616,9 +657,90 @@ function end(t, d) {
     document.getElementById('win-overlay').classList.remove('hidden');
 }
 
-window.resetGame = function() {
-    location.reload();
+window.toggleSettings = function() {
+    const panel = document.getElementById('lobby-settings');
+    panel.classList.toggle('hidden');
 };
+
+window.toggleSetting = function(btn, type) {
+    const dot = btn.querySelector('span');
+    const isOn = btn.classList.contains('bg-red-900');
+    
+    if (isOn) {
+        btn.classList.remove('bg-red-900');
+        btn.classList.add('bg-zinc-700');
+        dot.style.transform = 'translateX(-24px)';
+    } else {
+        btn.classList.remove('bg-zinc-700');
+        btn.classList.add('bg-red-900');
+        dot.style.transform = 'translateX(0)';
+    }
+    
+    saveSettings();
+};
+
+window.saveSettings = async function() {
+    if (!state.game || !state.roomID) return;
+    
+    const mafia = parseInt(document.getElementById('setting-mafia')?.value || 1);
+    const doctor = parseInt(document.getElementById('setting-doctor')?.value || 1);
+    const detective = parseInt(document.getElementById('setting-detective')?.value || 1);
+    
+    const intro = parseInt(document.getElementById('setting-time-intro')?.value || 60);
+    const night = parseInt(document.getElementById('setting-time-night')?.value || 60);
+    const discussion = parseInt(document.getElementById('setting-time-discussion')?.value || 60);
+    const day = parseInt(document.getElementById('setting-time-day')?.value || 90);
+    
+    const introScenarioOn = document.getElementById('setting-scenarios-intro')?.classList.contains('bg-red-900') ?? true;
+    const alibiScenarioOn = document.getElementById('setting-scenarios-alibi')?.classList.contains('bg-red-900') ?? true;
+    
+    const newSettings = {
+        roles: { mafia, doctor, detective },
+        timers: { intro, night, discussion, day },
+        scenarios: { intro: introScenarioOn, alibi: alibiScenarioOn }
+    };
+    
+    let game = { ...state.game, settings: newSettings };
+    await saveData(game);
+    showToast('Настройки сохранены', 'success');
+};
+
+function loadSettingsToUI(settings) {
+    if (!settings) return;
+    
+    const s = settings;
+    if (s.roles) {
+        document.getElementById('setting-mafia').value = s.roles.mafia;
+        document.getElementById('setting-doctor').value = s.roles.doctor;
+        document.getElementById('setting-detective').value = s.roles.detective;
+    }
+    if (s.timers) {
+        document.getElementById('setting-time-intro').value = s.timers.intro;
+        document.getElementById('setting-time-night').value = s.timers.night;
+        document.getElementById('setting-time-discussion').value = s.timers.discussion;
+        document.getElementById('setting-time-day').value = s.timers.day;
+    }
+    if (s.scenarios) {
+        updateToggle('setting-scenarios-intro', s.scenarios.intro);
+        updateToggle('setting-scenarios-alibi', s.scenarios.alibi);
+    }
+}
+
+function updateToggle(id, isOn) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    const dot = btn.querySelector('span');
+    
+    if (isOn) {
+        btn.classList.remove('bg-zinc-700');
+        btn.classList.add('bg-red-900');
+        dot.style.transform = 'translateX(0)';
+    } else {
+        btn.classList.remove('bg-red-900');
+        btn.classList.add('bg-zinc-700');
+        dot.style.transform = 'translateX(-24px)';
+    }
+}
 
 // Initialize
 init();

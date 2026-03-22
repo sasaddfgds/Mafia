@@ -141,7 +141,102 @@
                 </div>
                 <div id="player-list" class="grid grid-cols-1 gap-3"></div>
             </div>
-            <div id="admin-controls" class="hidden mt-4">
+            <div id="admin-controls" class="hidden mt-4 space-y-4">
+                <button onclick="toggleSettings()" class="btn-action w-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-black py-4 rounded-2xl uppercase tracking-[0.2em] text-[10px] border border-zinc-700 flex items-center justify-center gap-2">
+                    <span>⚙️</span> Настройки игры
+                </button>
+                
+                <div id="lobby-settings" class="hidden bg-zinc-900/50 p-6 rounded-2xl border border-zinc-800 space-y-5">
+                    <!-- Роли -->
+                    <div class="space-y-3">
+                        <p class="text-[9px] uppercase font-black text-zinc-500 tracking-widest">Количество ролей</p>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Мафия</label>
+                                <select id="setting-mafia" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Доктор</label>
+                                <select id="setting-doctor" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="0">0</option>
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Детектив</label>
+                                <select id="setting-detective" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="0">0</option>
+                                    <option value="1" selected>1</option>
+                                    <option value="2">2</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Таймеры -->
+                    <div class="space-y-3">
+                        <p class="text-[9px] uppercase font-black text-zinc-500 tracking-widest">Время фаз (сек)</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Знакомство</label>
+                                <select id="setting-time-intro" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                    <option value="60" selected>60</option>
+                                    <option value="90">90</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Ночь</label>
+                                <select id="setting-time-night" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="30">30</option>
+                                    <option value="45">45</option>
+                                    <option value="60" selected>60</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Обсуждение</label>
+                                <select id="setting-time-discussion" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="45">45</option>
+                                    <option value="60" selected>60</option>
+                                    <option value="90">90</option>
+                                    <option value="120">120</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[8px] uppercase text-zinc-600 font-bold">Голосование</label>
+                                <select id="setting-time-day" onchange="saveSettings()" class="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-3 text-[10px] font-bold text-zinc-300 outline-none focus:border-red-900">
+                                    <option value="60">60</option>
+                                    <option value="90" selected>90</option>
+                                    <option value="120">120</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Сценарии -->
+                    <div class="space-y-3">
+                        <p class="text-[9px] uppercase font-black text-zinc-500 tracking-widest">Сценарии</p>
+                        <div class="flex items-center justify-between p-3 bg-zinc-950/50 rounded-xl">
+                            <span class="text-[10px] font-bold text-zinc-400">Знакомство</span>
+                            <button id="setting-scenarios-intro" onclick="toggleSetting(this, 'intro')" class="w-12 h-6 bg-red-900 rounded-full relative transition-colors">
+                                <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-transform"></span>
+                            </button>
+                        </div>
+                        <div class="flex items-center justify-between p-3 bg-zinc-950/50 rounded-xl">
+                            <span class="text-[10px] font-bold text-zinc-400">Отмазки (ночь)</span>
+                            <button id="setting-scenarios-alibi" onclick="toggleSetting(this, 'alibi')" class="w-12 h-6 bg-red-900 rounded-full relative transition-colors">
+                                <span class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full transition-transform"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
                 <button onclick="startGame()" class="btn-action w-full bg-white text-black font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-xl border-b-4 border-zinc-300">Начать распределение ролей</button>
             </div>
         </section>
