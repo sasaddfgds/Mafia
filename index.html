@@ -5,98 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Мафия Онлайн | Night Updates</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Inter:wght@400;500;600;700&display=swap');
-        
-        :root {
-            --bg-dark: #0a0a0b;
-            --accent-red: #991b1b;
-            --zinc-900: #18181b;
-        }
-
-        .gothic-font { font-family: 'UnifrakturMaguntia', cursive; }
-        
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-dark);
-            color: #f4f4f5;
-            overflow-x: hidden;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .night-overlay {
-            background: radial-gradient(circle at center, #111025 0%, #020617 100%);
-        }
-
-        .btn-action {
-            @apply transition-all duration-200 active:scale-95 disabled:opacity-30 disabled:cursor-not-allowed;
-        }
-
-        .toast-notify {
-            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            opacity: 0;
-            transform: translateX(24px) scale(0.98);
-            transition: opacity 0.28s ease, transform 0.28s ease;
-            will-change: opacity, transform;
-        }
-
-        .toast-notify.show {
-            opacity: 1;
-            transform: translateX(0) scale(1);
-        }
-
-        .toast-notify.hide {
-            opacity: 0;
-            transform: translateX(18px) scale(0.99);
-        }
-
-        .toast-title {
-            font-size: 8px;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            font-weight: 900;
-            opacity: 0.7;
-            margin-bottom: 3px;
-        }
-
-        .player-card {
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .player-card.active {
-            border-color: rgba(185, 28, 28, 0.4);
-            background: rgba(185, 28, 28, 0.08);
-            transform: translateY(-2px);
-        }
-
-        .player-card.dead {
-            filter: grayscale(1) brightness(0.5);
-            border-color: rgba(185, 28, 28, 0.2);
-            background: rgba(127, 29, 29, 0.1);
-        }
-
-        #action-panel {
-            backdrop-filter: blur(24px);
-            background: rgba(15, 15, 18, 0.96);
-            box-shadow: 0 -20px 50px -10px rgba(0, 0, 0, 0.8);
-        }
-
-        .scrollbar-hide::-webkit-scrollbar { display: none; }
-        
-        .role-reveal-anim {
-            animation: reveal 0.5s ease-out forwards;
-        }
-
-        @keyframes reveal {
-            from { transform: scale(0.9); opacity: 0; filter: blur(10px); }
-            to { transform: scale(1); opacity: 1; filter: blur(0); }
-        }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="min-h-screen flex flex-col transition-colors duration-1000" id="main-body">
 
@@ -113,7 +22,6 @@
         <header class="py-10 text-center relative">
             <h1 class="text-7xl gothic-font text-red-800 mb-2 drop-shadow-[0_0_15px_rgba(153,27,27,0.4)]">Mafia</h1>
             
-            <!-- User Info в правом верхнем углу -->
             <div id="user-header" class="hidden absolute top-0 right-0 flex items-center gap-3">
                 <span id="header-username" class="text-[11px] font-black text-zinc-400 tracking-widest">---</span>
                 <button onclick="openSettings()" class="w-10 h-10 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-center hover:border-red-900/50 transition-colors">
@@ -129,104 +37,72 @@
             </div>
         </header>
 
-        <!-- Секция Входа/Регистрации -->
         <section id="auth-section" class="flex flex-col gap-6 max-w-sm mx-auto w-full role-reveal-anim">
             <div class="bg-zinc-900/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl backdrop-blur-md">
-                <!-- Форма Входа -->
                 <div id="login-form" class="space-y-6">
                     <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Вход в город</p>
-                    
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Email</label>
                         <input type="email" id="login-email" placeholder="your@email.com" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Пароль</label>
                         <input type="password" id="login-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-                    
-                    <button onclick="handleLogin()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
-                        Войти
-                    </button>
-
+                    <button onclick="handleLogin()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">Войти</button>
                     <div class="text-center">
-                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
-                            Нет аккаунта? Создать
-                        </button>
+                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">Нет аккаунта? Создать</button>
                     </div>
                 </div>
 
-                <!-- Форма Регистрации (скрыта по умолчанию) -->
                 <div id="register-form" class="hidden space-y-6">
                     <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Регистрация</p>
-                    
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Псевдоним</label>
                         <input type="text" id="register-username" maxlength="12" placeholder="Как вас звать?" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Email</label>
                         <input type="email" id="register-email" placeholder="your@email.com" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Пароль</label>
                         <input type="password" id="register-password" placeholder="Минимум 6 символов" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Подтвердите пароль</label>
                         <input type="password" id="register-confirm-password" placeholder="••••••" class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold">
                     </div>
-                    
-                    <button onclick="handleRegister()" class="btn-action w-full bg-white hover:bg-zinc-200 text-black font-black py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-xs flex justify-center items-center gap-3 border-b-4 border-zinc-300">
-                        Создать аккаунт
-                    </button>
-
+                    <button onclick="handleRegister()" class="btn-action w-full bg-white hover:bg-zinc-200 text-black font-black py-5 rounded-2xl shadow-2xl uppercase tracking-widest text-xs flex justify-center items-center gap-3 border-b-4 border-zinc-300">Создать аккаунт</button>
                     <div class="text-center">
-                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
-                            Уже есть аккаунт? Войти
-                        </button>
+                        <button onclick="toggleAuthMode()" class="text-[9px] text-zinc-500 hover:text-red-500 transition-colors uppercase tracking-widest font-black">Уже есть аккаунт? Войти</button>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Главное меню (после авторизации) -->
         <section id="main-menu-section" class="hidden flex flex-col gap-6 max-w-sm mx-auto w-full role-reveal-anim">
             <div class="bg-zinc-900/40 p-10 rounded-[2.5rem] border border-zinc-800 shadow-2xl backdrop-blur-md">
                 <p class="text-[10px] text-zinc-500 uppercase text-center font-black tracking-[0.3em] mb-4">Добро пожаловать в город</p>
-                
-                <!-- Список активных комнат -->
                 <div class="space-y-3 mb-6">
                     <p class="text-[9px] uppercase font-black text-zinc-600 ml-3 tracking-widest">Активные комнаты</p>
                     <div id="active-rooms-list" class="space-y-2 max-h-40 overflow-y-auto scrollbar-hide">
                         <p class="text-[10px] text-zinc-700 text-center py-4 italic">Нет активных комнат</p>
                     </div>
                 </div>
-
                 <div class="border-t border-zinc-800/50 pt-6 space-y-4">
                     <div>
                         <label class="text-[9px] uppercase font-black text-zinc-600 ml-3 mb-2 block tracking-widest">Войти в комнату</label>
                         <input type="text" id="main-menu-room-input" placeholder="Введите код..." class="w-full bg-zinc-950/80 border border-zinc-800 p-4 rounded-2xl outline-none text-white focus:border-red-900 transition-all placeholder:text-zinc-800 font-bold text-xs font-mono uppercase">
                     </div>
-                    
-                    <button onclick="handleJoinFromMainMenu()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">
-                        Войти в город
-                    </button>
+                    <button onclick="handleJoinFromMainMenu()" class="btn-action w-full bg-red-900 hover:bg-red-800 text-white font-black py-5 rounded-2xl shadow-2xl shadow-red-950/40 uppercase tracking-widest text-xs flex justify-center items-center gap-3">Войти в город</button>
                 </div>
-
                 <div class="mt-6 pt-6 border-t border-zinc-800/50 text-center">
-                    <button onclick="handleLogout()" class="text-[9px] text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-widest font-black">
-                        Выйти из аккаунта
-                    </button>
+                    <button onclick="handleLogout()" class="text-[9px] text-zinc-600 hover:text-red-500 transition-colors uppercase tracking-widest font-black">Выйти из аккаунта</button>
                 </div>
             </div>
         </section>
 
-        <!-- Модал настроек -->
         <div id="settings-modal" class="hidden fixed inset-0 z-[400] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
             <div class="bg-zinc-900/95 border border-zinc-800 rounded-[2.5rem] p-8 w-full max-w-sm shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
@@ -235,20 +111,14 @@
                         <span class="text-zinc-500 text-[10px]">✕</span>
                     </button>
                 </div>
-                
                 <div class="space-y-6">
-                    <!-- Аватарка (заглушка) -->
                     <div class="flex items-center gap-4 p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
-                        <div class="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-2xl">
-                            👤
-                        </div>
+                        <div class="w-16 h-16 rounded-2xl bg-zinc-800 flex items-center justify-center text-2xl">👤</div>
                         <div>
                             <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Аватарка</p>
                             <p class="text-[9px] text-zinc-600">Скоро будет доступно</p>
                         </div>
                     </div>
-
-                    <!-- Тема (заглушка) -->
                     <div class="flex items-center justify-between p-4 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
                         <div>
                             <p class="text-[10px] font-black text-zinc-400 uppercase tracking-widest mb-1">Тема оформления</p>
@@ -260,7 +130,6 @@
             </div>
         </div>
 
-        <!-- Секция Лобби -->
         <section id="lobby-section" class="hidden flex flex-col gap-6 role-reveal-anim">
             <div class="bg-zinc-900/30 p-8 rounded-[2.5rem] border border-zinc-800/50 backdrop-blur-sm">
                 <div class="flex justify-between items-center mb-8 px-2">
@@ -272,13 +141,11 @@
                 </div>
                 <div id="player-list" class="grid grid-cols-1 gap-3"></div>
             </div>
-            
             <div id="admin-controls" class="hidden mt-4">
                 <button onclick="startGame()" class="btn-action w-full bg-white text-black font-black py-5 rounded-2xl uppercase tracking-[0.2em] text-[10px] shadow-xl border-b-4 border-zinc-300">Начать распределение ролей</button>
             </div>
         </section>
 
-        <!-- Секция Игры -->
         <section id="game-section" class="hidden flex flex-col gap-6 role-reveal-anim">
             <div class="flex items-center justify-between px-3">
                 <div class="flex items-center gap-4">
@@ -290,9 +157,7 @@
                 </div>
                 <div id="game-timer" class="text-[11px] font-black text-red-500 bg-red-950/20 border border-red-900/30 px-4 py-2 rounded-xl tabular-nums">---</div>
             </div>
-
             <div id="game-grid" class="grid grid-cols-2 gap-4"></div>
-            
             <div class="mt-4">
                 <p class="text-[9px] font-black text-zinc-600 uppercase mb-3 ml-2 tracking-widest">Хроники города</p>
                 <div id="game-log" class="bg-black/40 border border-zinc-900/50 rounded-[2rem] p-5 h-40 overflow-y-auto text-[11px] font-medium text-zinc-500 space-y-3 scrollbar-hide"></div>
@@ -300,7 +165,6 @@
         </section>
     </div>
 
-    <!-- Панель действий -->
     <div id="action-panel" class="hidden fixed bottom-0 right-0 left-0 md:left-auto md:right-8 md:bottom-8 md:w-80 p-6 border-t md:border border-zinc-800 md:rounded-[2.5rem] z-[150] transition-transform duration-500 translate-y-full">
         <div class="flex flex-col gap-5">
             <div class="flex items-center justify-between border-b border-zinc-800/50 pb-4">
@@ -313,1030 +177,18 @@
                     <span id="panel-status" class="text-[10px] font-black bg-zinc-900 px-3 py-1 rounded-lg border border-zinc-800">---</span>
                 </div>
             </div>
-            
-            <div id="panel-instruction" class="text-[11px] text-zinc-400 font-bold leading-relaxed bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50">
-                ---
-            </div>
-
+            <div id="panel-instruction" class="text-[11px] text-zinc-400 font-bold leading-relaxed bg-zinc-900/50 p-4 rounded-2xl border border-zinc-800/50">---</div>
             <div id="panel-actions" class="flex flex-col gap-3"></div>
         </div>
     </div>
 
-    <!-- Оверлей победы -->
     <div id="win-overlay" class="hidden fixed inset-0 bg-black/98 z-[500] flex flex-col items-center justify-center p-10 text-center backdrop-blur-xl">
         <h1 id="win-title" class="text-8xl gothic-font text-red-800 mb-6 drop-shadow-[0_0_30px_rgba(153,27,27,0.8)]">---</h1>
         <p id="win-desc" class="text-zinc-500 mb-12 text-sm max-w-sm font-bold tracking-widest uppercase leading-loose"></p>
         <button onclick="resetGame()" class="btn-action bg-white text-black px-16 py-5 rounded-2xl font-black uppercase text-[10px] tracking-[0.3em] hover:bg-zinc-200 shadow-2xl">Вернуться в лобби</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc, onSnapshot, getDocs, collection, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- БАЗЫ ДАННЫХ ДЛЯ СЦЕНАРИЕВ ---
-        const introScenarios = [
-            // Профессии базовые
-            "Я скромный пекарь, всё утро пёк хлеб для города. Запах дрожжей — мой аромат.",
-            "Я местный библиотекарь, обожаю тишину и старые книги. Знаю, кто какие книги берёт.",
-            "Я кузнец, весь день работал в кузнице, руки в саже. Ковал подкову для мэра лично.",
-            "Я заезжий торговец специями, ищу здесь новые знакомства. Перец чили у меня — огонь!",
-            "Я врач, лечу людей и всегда готов прийти на помощь. Вчера ночью кого-то лечил... странный случай.",
-            "Я садовник из поместья на холме, стриг кусты. Розы цветут прекрасно в этом году.",
-            "Я учитель в местной школе, очень люблю детей. Дети болтают много интересного.",
-            "Я моряк, только вчера сошел с корабля в ваш порт. Расскажу про призрачный фрегат.",
-            "Я лесничий, знаю каждый куст в лесу за городом. Видел вчера странные следы...",
-            "Я художник, приехал сюда за вдохновением и пейзажами. Пишу закат над старым заводом.",
-            "Я плотник, помогал чинить забор у мэрии. Видел, кто заходил в задний вход ночью.",
-            "Я простой почтальон, разношу письма по утрам. Читаю адреса, но не содержимое. Почти.",
-            "Я аптекарь, знаю всё о целебных травах. Многие приходят за снотворным в полночь.",
-            "Я часовщик, люблю точность и тиканье механизмов. Время — враг, но я его приручил.",
-            "Я швея, шью лучшие костюмы в этом районе. Мэр носит мои пуговицы на пальто.",
-            "Я пастух, весь день провел на пастбище с овцами. Овцы тихие, не как эти жители.",
-            "Я повар из ресторана, сегодня готовил жаркое. Мясо — свежее, говорят мясник.",
-            "Я инженер, приехал проверить городские мосты. Мосты надёжны, я проверял трижды.",
-            "Я студент, изучаю историю этого старого города. Нашёл странные записи о 1923...",
-            "Я музыкант, играю на скрипке на площади. Вчера ночью слышал странную мелодию в лесу.",
-            // Дополнительные профессии
-            "Я кладовщик на складе у реки. Знаю, что привозят ночью в закрытых фургонах.",
-            "Я фуд-блогер, приехал снимать местную кухню. Где тут есть тайные кафе?",
-            "Я криптозоолог. Изучаю слухи о 'Городском Болотном Человеке'. Пока ничего... живого.",
-            "Я вдовец, живу в доме у озера. Жена утонула... сама. Я это докажу.",
-            "Я приёмщик металлолома. Много ножей приносят последнее время. Острых.",
-            "Я ночной бармен в забегаловке у дороги. Вижу, кто приходит с пятнами.",
-            "Я патологоанатом в больнице. Знаю, как умирают естественно... и нет.",
-            "Я охранник заброшенной фабрики. Слышу шаги в пустых цехах. Не хожу туда.",
-            "Я детектив в отставке. Нюх не обманешь, а здесь пахнет кровью.",
-            "Я новый владелец старого отеля. Гости жалуются на стук в стенах. Я тоже слышу."
-        ];
-
-        const alibiScenarios = [
-            // Бытовые отмазки
-            "Я всю ночь чинил сломанный кран на кухне. Вода хлюпала до утра.",
-            "У меня жуткая бессонница, смотрел сериалы. Третий сезон 'Мёртвого озера'.",
-            "Вчера была тяжелая смена, спал как убитый. Даже не слышал тишины.",
-            "Гулял с собакой поздно вечером в парке. Собака лаяла на что-то в кустах.",
-            "Всю ночь играл в видеоигры в наушниках. Рейд проходил, не мог бросить.",
-            "Готовил срочный отчет, выпил литр кофе. Руки до сих пор трясутся.",
-            "Я отравился, всю ночь просидел в уборной. Подозреваю молоко.",
-            "У меня был романтический ужин до утра. Свечи, вино... потом сон.",
-            "Пытался собрать шкаф, разозлился и бросил. Инструкция — на китайском.",
-            "Всю ночь читал увлекательный детектив. Думал, я тоже смог бы раскрыть.",
-            "Сидел в наушниках и сводил новый музыкальный бит. Бас громкий — ничего не слышал.",
-            "У меня вчера сорвало трубу, убирал воду. Кошка плавала в ванне.",
-            "Был на дне рождения друга, вернулся поздно. Выпил... достаточно.",
-            "Ночью у меня самое продуктивное время работы. Писал код до рассвета.",
-            "Пытался убаюкать плачущего ребенка. Потом сам уснул с ним на руках.",
-            "Смотрел марафон фильмов ужасов. В окно стучало — оказалось ветка.",
-            "Переписывался с иностранными партнерами. Разница во времени — моя погибель.",
-            "Медитировал почти всю ночь. Осознал пустоту бытия. И уснул.",
-            "Купил приставку, играл до рассвета. Глаза красные, но душа довольна.",
-            "Поссорился с женой, гулял по району один. Думал о жизни. И пил пиво.",
-            // Абсурдные и смешные
-            "Ночевал в гараже — ключ от дома провалился в решётку улицы. Пытался достать проволокой.",
-            "Смотрел в окно на луну три часа. Думал о смысле бытия. Потом забыл, о чём думал.",
-            "Тренировался в беззвучном крике. Соседи не жаловались, я проверял.",
-            "Учил попугая говорить 'кто там'. Попугай молчит. Я тоже.",
-            "Сортировал носки по цвету. Потом по текстуре. Потом просто плакал.",
-            "Пытался вырастить бонсай из вишнёвой косточки. Песню пел ей.",
-            "Ремонтировал старую кофеварку третий час. Пила как чай — без давления.",
-            "Смотрел, как сохнет краска на стене. Цвет 'пепельная роза' — ложь, он серый.",
-            "Считал кафельные плитки в ванной. 342. Или 343? Придётся пересчитать.",
-            "Писал автобиографию. Остановился на третьей главе: 'Детство — мутное'.",
-            // Мрачные и тревожные
-            "Слышал крики с улицы, но не выходил. Здесь не принято вмешиваться.",
-            "Видел в окно странную машину, которая час стояла на углу. Потом уехала.",
-            "Ночью пришёл незнакомец, спрашивал дорогу к дому убитого. Я промолчал.",
-            "Собака всю ночь скулила на цепи. Я её не выпускал. Может, знала что-то.",
-            "Читал старые газеты про исчезновения 1998-го. Здесь это норма.",
-            "Смотрел на соседа через шторы. Он тоже смотрел на меня. Никто не махнул.",
-            "Кот принёс на порог мёртвую крысу. Я предпочёл не думать об этом.",
-            "Будильник звенел в 3:33 каждую ночь. Я выключил. Он всё равно звенел.",
-            "В подвале что-то стукало. Я заложил дверь книгами. Почему-то помогло.",
-            "Снился один и тот же сон: кто-то стоит у изголовья. Просыпался — никого."
-        ];
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyA4lPo1Q9Mk9V0dUhsFOYfumecHt19asPk",
-            authDomain: "mafia-5f82b.firebaseapp.com",
-            projectId: "mafia-5f82b",
-            storageBucket: "mafia-5f82b.firebasestorage.app",
-            messagingSenderId: "318958707760",
-            appId: "1:318958707760:web:920d10e4e215bd8b58f9f5",
-            measurementId: "G-GKL25JD5NZ"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let state = {
-            userId: null,
-            roomID: null,
-            game: null,
-            unsubscribeSnapshot: null
-        };
-
-        let renderedHistoryCount = 0;
-        let showScenarioUI = false; // Состояние отображения сценария
-        let lastPrivateToastKey = "";
-        let toastQueue = [];
-        let toastIsShowing = false;
-
-        window.showToast = function(message, type = 'info') {
-            toastQueue.push({ message, type });
-            processToastQueue();
-        }
-
-        function processToastQueue() {
-            if (toastIsShowing || toastQueue.length === 0) return;
-
-            toastIsShowing = true;
-            const { message, type } = toastQueue.shift();
-            const container = document.getElementById('toast-container');
-            const toast = document.createElement('div');
-
-            const variants = {
-                info: { bg: "bg-zinc-900/95 border-zinc-700 text-zinc-200", icon: "🔔", title: "Событие" },
-                phase: { bg: "bg-indigo-950/95 border-indigo-800 text-indigo-100 shadow-indigo-900/30", icon: "🌙", title: "Фаза" },
-                success: { bg: "bg-green-950/95 border-green-800 text-green-200", icon: "✔", title: "Успех" },
-                danger: { bg: "bg-red-950/95 border-red-800 text-red-200 shadow-red-900/30", icon: "💀", title: "Тревога" },
-                special: { bg: "bg-purple-950/95 border-purple-800 text-purple-100", icon: "✨", title: "Важно" },
-                private: { bg: "bg-amber-950/95 border-amber-800 text-amber-100 shadow-amber-900/30", icon: "🕵", title: "Лично Вам" }
-            };
-
-            const selected = variants[type] || variants.info;
-            toast.className = `toast-notify px-5 py-4 rounded-2xl text-[11px] font-black border-2 ${selected.bg}`;
-            toast.innerHTML = `
-                <div class="flex items-start gap-3">
-                    <span class="text-base mt-[1px]">${selected.icon}</span>
-                    <div>
-                        <div class="toast-title">${selected.title}</div>
-                        <div class="uppercase tracking-widest leading-relaxed">${message}</div>
-                    </div>
-                </div>
-            `;
-            
-            container.appendChild(toast);
-            requestAnimationFrame(() => toast.classList.add('show'));
-
-            setTimeout(() => {
-                toast.classList.remove('show');
-                toast.classList.add('hide');
-
-                setTimeout(() => {
-                    toast.remove();
-                    toastIsShowing = false;
-                    processToastQueue();
-                }, 320);
-            }, 3000);
-        }
-
-        async function cleanupOldRooms() {
-            try {
-                const roomsSnap = await getDocs(collection(db, 'rooms'));
-                const now = Date.now();
-                roomsSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    if (data.createdAt && (now - data.createdAt > 12 * 60 * 60 * 1000)) {
-                        deleteDoc(doc(db, 'rooms', docSnap.id));
-                    }
-                });
-            } catch(e) {}
-        }
-
-        // Очистка лобби с менее чем 3 игроками
-        async function cleanupSmallLobbies() {
-            try {
-                const roomsSnap = await getDocs(collection(db, 'rooms'));
-                roomsSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    // Удаляем лобби если меньше 3 игроков и фаза lobby
-                    if (data.phase === 'lobby' && (!data.players || data.players.length < 3)) {
-                        deleteDoc(doc(db, 'rooms', docSnap.id));
-                        console.log(`Deleted small lobby: ${docSnap.id} (${data.players?.length || 0} players)`);
-                    }
-                });
-            } catch(e) {
-                console.error('Error cleaning up small lobbies:', e);
-            }
-        }
-
-        // Запускаем очистку каждый час
-        setInterval(cleanupSmallLobbies, 60 * 60 * 1000);
-        // И сразу при загрузке
-        cleanupSmallLobbies();
-
-        // Очистка неактивных комнат (не в фазе lobby)
-        async function cleanupInactiveRooms() {
-            try {
-                const roomsSnap = await getDocs(collection(db, 'rooms'));
-                const now = Date.now();
-                roomsSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    // Удаляем если фаза не lobby (игра идет или закончилась)
-                    // или если нет активности более 2 часов
-                    const lastActivity = data.turnEndTime || data.createdAt || 0;
-                    const inactiveTime = now - lastActivity;
-                    
-                    if (data.phase !== 'lobby' && data.phase !== 'waiting') {
-                        // Удаляем комнаты где игра уже идет или закончилась
-                        deleteDoc(doc(db, 'rooms', docSnap.id));
-                        console.log(`Deleted inactive game room: ${docSnap.id} (phase: ${data.phase})`);
-                    } else if (inactiveTime > 2 * 60 * 60 * 1000) {
-                        // Удаляем если нет активности более 2 часов
-                        deleteDoc(doc(db, 'rooms', docSnap.id));
-                        console.log(`Deleted stale room: ${docSnap.id} (inactive for ${Math.round(inactiveTime/60000)} min)`);
-                    }
-                });
-            } catch(e) {
-                console.error('Error cleaning up inactive rooms:', e);
-            }
-        }
-
-        // Запускаем очистку каждые 30 минут
-        setInterval(cleanupInactiveRooms, 30 * 60 * 1000);
-        // И сразу при загрузке
-        cleanupInactiveRooms();
-
-        function getRoomRef(roomId) {
-            return doc(db, 'rooms', roomId);
-        }
-
-        function getNextNightRole(game) {
-            const aliveRoles = new Set(game.players.filter(p => p.isAlive).map(p => p.role));
-            if (aliveRoles.has('Мафия') && !game.actions['Мафия']) return 'Мафия';
-            if (aliveRoles.has('Доктор') && !game.actions['Доктор']) return 'Доктор';
-            if (aliveRoles.has('Детектив') && !game.actions['Детектив']) return 'Детектив';
-            return null;
-        }
-
-        function addHistory(game, message) {
-            if (!game.history) game.history = [];
-            if (game.history[game.history.length - 1] !== message) game.history.push(message);
-        }
-
-        function announceNightStart(game) {
-            addHistory(game, "Наступает ночь. Мирные жители спят.");
-            const firstRole = getNextNightRole(game);
-            if (firstRole) {
-                addHistory(game, `Просыпается ${firstRole} и выбирает действие.`);
-                game.turnEndTime = Date.now() + 60000;
-            } else {
-                addHistory(game, "Этой ночью никто не просыпается.");
-                game.turnEndTime = 0;
-            }
-        }
-
-        function detectToastTypeFromHistory(message) {
-            const lower = message.toLowerCase();
-            if (lower.includes('началась') || lower.includes('победил') || lower.includes('роли распределены')) return 'special';
-            if (lower.includes('изгнан') || lower.includes('мертв') || lower.includes('кроваво') || lower.includes('пал')) return 'danger';
-            if (lower.includes('ночь') || lower.includes('просыпается') || lower.includes('голосовать') || lower.includes('обсуждение')) return 'phase';
-            return 'info';
-        }
-
-        function showPrivateToastOnce(key, message) {
-            if (lastPrivateToastKey === key) return;
-            lastPrivateToastKey = key;
-            showToast(message, 'private');
-        }
-
-        async function saveData(newGameData) {
-            if (!auth.currentUser || !state.roomID) return;
-            try {
-                await setDoc(getRoomRef(state.roomID), newGameData);
-            } catch (e) {
-                console.error("Save Error:", e);
-            }
-        }
-
-        async function init() {
-            onAuthStateChanged(auth, async user => {
-                if (user) {
-                    state.userId = user.uid;
-                    // Получаем username из Firestore или из displayName
-                    const userDoc = await getDoc(doc(db, 'users', user.uid));
-                    if (userDoc.exists()) {
-                        window.currentUsername = userDoc.data().username || user.displayName || 'Игрок';
-                    } else {
-                        window.currentUsername = user.displayName || 'Игрок';
-                    }
-                    
-                    // Обновляем UI хедера
-                    document.getElementById('header-username').innerText = window.currentUsername;
-                    document.getElementById('user-header').classList.remove('hidden');
-                    
-                    // Показываем главное меню
-                    document.getElementById('auth-section').classList.add('hidden');
-                    document.getElementById('main-menu-section').classList.remove('hidden');
-                    
-                    // Загружаем активные комнаты
-                    await fetchActiveRooms();
-                    
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                } else {
-                    // Пользователь не авторизован - показываем форму
-                    document.getElementById('auth-section').classList.remove('hidden');
-                    document.getElementById('main-menu-section').classList.add('hidden');
-                    document.getElementById('user-header').classList.add('hidden');
-                    document.getElementById('loading-overlay').classList.add('hidden');
-                }
-            });
-
-            setInterval(() => {
-                if (!state.game || !['introduction', 'discussion', 'day', 'night'].includes(state.game.phase)) {
-                    document.getElementById('game-timer').innerText = '--:--';
-                    return;
-                }
-
-                const timeLeft = Math.max(0, Math.ceil((state.game.turnEndTime - Date.now()) / 1000));
-                const isVote = state.game.phase === 'day';
-                const isNightAction = state.game.phase === 'night';
-                document.getElementById('game-timer').innerText = `${isVote ? 'ГОЛОС: ' : (isNightAction ? 'ДЕЙСТВИЕ: ' : 'РЕЧЬ: ')}${timeLeft}С`;
-                
-                if (timeLeft === 0) {
-                    const me = state.game.players.find(p => p.id === state.userId);
-                    if (isNightAction) {
-                        if (me && me.isAdmin && !window.nightTimeoutLock) {
-                            window.nightTimeoutLock = true;
-                            window.resolveNightTimeout(state.game);
-                            setTimeout(() => window.nightTimeoutLock = false, 5000);
-                        }
-                    } else if (isVote) {
-                        if (me && me.isAdmin && !window.resolvingDayLock) {
-                            window.resolvingDayLock = true;
-                            window.resolveDay(state.game);
-                            setTimeout(() => window.resolvingDayLock = false, 5000);
-                        }
-                    } else {
-                        const currentSpeaker = state.game.players[state.game.speakerIndex];
-                        if (currentSpeaker && currentSpeaker.id === state.userId && !window.speakerEndLock) {
-                            window.speakerEndLock = true;
-                            window.nextSpeaker();
-                            setTimeout(() => window.speakerEndLock = false, 5000);
-                        }
-                    }
-                }
-            }, 1000);
-        }
-
-        window.joinRoom = async function(roomIdFromForm) {
-            const name = window.currentUsername || 'Игрок';
-            const rid = roomIdFromForm || document.getElementById('room-id-input')?.value?.trim();
-
-            if (!rid) return showToast("Укажите код комнаты", "danger");
-            
-            state.roomID = 'ROOM_' + rid.toUpperCase();
-            const docRef = getRoomRef(state.roomID);
-            
-            try {
-                const docSnap = await getDoc(docRef);
-                let gameData;
-
-                if (docSnap.exists()) {
-                    gameData = docSnap.data();
-                    if (!gameData.players.find(p => p.id === state.userId)) {
-                        if (gameData.phase !== 'lobby') return showToast("Игра уже идет", "danger");
-                        gameData.players.push({
-                            id: state.userId,
-                            name: name,
-                            isAdmin: false,
-                            isAlive: true,
-                            role: 'Житель'
-                        });
-                    }
-                } else {
-                    gameData = {
-                        phase: 'lobby',
-                        players: [{
-                            id: state.userId,
-                            name: name,
-                            isAdmin: true,
-                            isAlive: true,
-                            role: 'Житель'
-                        }],
-                        history: ["Комната создана. Город ожидает жителей."],
-                        actions: {},
-                        votes: {},
-                        speakerIndex: 0,
-                        turnEndTime: 0,
-                        createdAt: Date.now()
-                    };
-                }
-
-                await saveData(gameData);
-                renderedHistoryCount = 0;
-                lastPrivateToastKey = "";
-
-                state.unsubscribeSnapshot = onSnapshot(docRef, snap => {
-                    if (snap.exists()) {
-                        state.game = snap.data();
-                        render();
-                    }
-                });
-
-                document.getElementById('auth-section').classList.add('hidden');
-                document.getElementById('main-menu-section').classList.add('hidden');
-                document.getElementById('room-controls').classList.remove('hidden');
-                document.getElementById('display-room-id').innerText = rid.toUpperCase();
-
-            } catch (e) {
-                showToast("Ошибка сети", "danger");
-            }
-        }
-
-        // Переключение между формами входа и регистрации
-        window.toggleAuthMode = function() {
-            const loginForm = document.getElementById('login-form');
-            const registerForm = document.getElementById('register-form');
-            
-            if (loginForm.classList.contains('hidden')) {
-                loginForm.classList.remove('hidden');
-                registerForm.classList.add('hidden');
-            } else {
-                loginForm.classList.add('hidden');
-                registerForm.classList.remove('hidden');
-            }
-        }
-
-        // Обработка входа
-        window.handleLogin = async function() {
-            const email = document.getElementById('login-email').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!email || !password) {
-                showToast("Введите email и пароль", "danger");
-                return;
-            }
-
-            try {
-                await signInWithEmailAndPassword(auth, email, password);
-                showToast("Вход выполнен успешно", "success");
-                // onAuthStateChanged обработает переключение на главное меню
-            } catch (error) {
-                let errorMsg = "Ошибка входа";
-                switch (error.code) {
-                    case 'auth/user-not-found':
-                        errorMsg = "Пользователь не найден";
-                        break;
-                    case 'auth/wrong-password':
-                        errorMsg = "Неверный пароль";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMsg = "Некорректный email";
-                        break;
-                    case 'auth/too-many-requests':
-                        errorMsg = "Слишком много попыток. Попробуйте позже";
-                        break;
-                }
-                showToast(errorMsg, "danger");
-            }
-        }
-
-        // Обработка регистрации
-        window.handleRegister = async function() {
-            const username = document.getElementById('register-username').value.trim();
-            const email = document.getElementById('register-email').value.trim();
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-
-            // Валидация
-            if (!username || !email || !password) {
-                showToast("Заполните все поля", "danger");
-                return;
-            }
-
-            if (password.length < 6) {
-                showToast("Пароль должен быть минимум 6 символов", "danger");
-                return;
-            }
-
-            if (password !== confirmPassword) {
-                showToast("Пароли не совпадают", "danger");
-                return;
-            }
-
-            try {
-                // Создаем пользователя
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                state.userId = userCredential.user.uid;
-                
-                // Сохраняем username в Firestore
-                await setDoc(doc(db, 'users', state.userId), {
-                    username: username,
-                    email: email,
-                    createdAt: Date.now()
-                });
-                
-                // Обновляем displayName в Auth
-                await updateProfile(userCredential.user, { displayName: username });
-                
-                window.currentUsername = username;
-                showToast("Аккаунт создан", "success");
-                // onAuthStateChanged обработает переключение на главное меню
-            } catch (error) {
-                let errorMsg = "Ошибка регистрации";
-                switch (error.code) {
-                    case 'auth/email-already-in-use':
-                        errorMsg = "Этот email уже используется";
-                        break;
-                    case 'auth/invalid-email':
-                        errorMsg = "Некорректный email";
-                        break;
-                    case 'auth/weak-password':
-                        errorMsg = "Слабый пароль (минимум 6 символов)";
-                        break;
-                }
-                showToast(errorMsg, "danger");
-            }
-        }
-
-        // Загрузка активных комнат
-        async function fetchActiveRooms() {
-            try {
-                const roomsSnap = await getDocs(collection(db, 'rooms'));
-                const rooms = [];
-                roomsSnap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    // Показываем только комнаты в фазе lobby
-                    if (data.phase === 'lobby') {
-                        rooms.push({
-                            id: docSnap.id,
-                            playersCount: data.players?.length || 0,
-                            ...data
-                        });
-                    }
-                });
-                renderActiveRooms(rooms);
-            } catch (e) {
-                console.error('Error fetching rooms:', e);
-            }
-        }
-
-        // Отображение активных комнат
-        function renderActiveRooms(rooms) {
-            const container = document.getElementById('active-rooms-list');
-            if (rooms.length === 0) {
-                container.innerHTML = '<p class="text-[10px] text-zinc-700 text-center py-4 italic">Нет активных комнат</p>';
-                return;
-            }
-            
-            container.innerHTML = rooms.map(room => {
-                const roomCode = room.id.replace('ROOM_', '');
-                return `
-                    <div class="flex items-center justify-between p-3 bg-zinc-950/50 rounded-2xl border border-zinc-800/50">
-                        <div class="flex items-center gap-3">
-                            <span class="text-lg">🏛️</span>
-                            <div>
-                                <p class="text-[11px] font-black text-zinc-400">${roomCode}</p>
-                                <p class="text-[9px] text-zinc-600">${room.playersCount}/10 жителей</p>
-                            </div>
-                        </div>
-                        <button onclick="joinRoom('${roomCode}')" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-xl text-[9px] font-black uppercase text-zinc-300 transition-colors">
-                            Войти
-                        </button>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Вход в комнату из главного меню
-        window.handleJoinFromMainMenu = function() {
-            const roomId = document.getElementById('main-menu-room-input').value.trim();
-            if (!roomId) {
-                showToast("Введите код комнаты", "danger");
-                return;
-            }
-            joinRoom(roomId);
-        }
-
-        // Выход из аккаунта
-        window.handleLogout = async function() {
-            try {
-                await auth.signOut();
-                state.userId = null;
-                window.currentUsername = null;
-                showToast("Вы вышли из аккаунта", "info");
-            } catch (e) {
-                showToast("Ошибка выхода", "danger");
-            }
-        }
-
-        // Открыть настройки
-        window.openSettings = function() {
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
-
-        // Закрыть настройки
-        window.closeSettings = function() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-
-        window.leaveRoom = function() {
-            location.reload();
-        }
-
-        function render() {
-            if (!state.game) return;
-
-            const me = state.game.players.find(p => p.id === state.userId);
-            if (!me) return;
-
-            const log = document.getElementById('game-log');
-            if (renderedHistoryCount === 0 && state.game.history?.length) {
-                log.innerHTML = state.game.history.map(msg => `
-                    <div class="flex gap-3 border-l-2 border-zinc-800 pl-4 py-1">
-                        <span class="text-zinc-700 font-black">#</span>
-                        <span class="leading-relaxed italic">${msg}</span>
-                    </div>
-                `).join('');
-                log.scrollTop = log.scrollHeight;
-                renderedHistoryCount = state.game.history.length;
-            } else if (state.game.history?.length > renderedHistoryCount) {
-                const freshEntries = state.game.history.slice(renderedHistoryCount);
-                freshEntries.forEach(msg => {
-                    log.innerHTML += `
-                        <div class="flex gap-3 border-l-2 border-zinc-800 pl-4 py-1 animate-reveal">
-                            <span class="text-zinc-700 font-black">#</span>
-                            <span class="leading-relaxed italic">${msg}</span>
-                        </div>
-                    `;
-                    showToast(msg, detectToastTypeFromHistory(msg));
-                });
-                log.scrollTop = log.scrollHeight;
-                renderedHistoryCount = state.game.history.length;
-            }
-
-            if (state.game.phase === 'lobby') {
-                document.getElementById('lobby-section').classList.remove('hidden');
-                document.getElementById('game-section').classList.add('hidden');
-                document.getElementById('action-panel').classList.add('hidden');
-
-                document.getElementById('player-count').innerText = `${state.game.players.length}/10`;
-                document.getElementById('admin-controls').classList.toggle('hidden', !me.isAdmin);
-                
-                document.getElementById('player-list').innerHTML = state.game.players.map(p => `
-                    <div class="bg-zinc-900/60 p-5 rounded-2xl border border-zinc-800/50 flex justify-between items-center">
-                        <span class="text-xs font-black ${p.id === state.userId ? 'text-red-500' : 'text-zinc-300'} tracking-widest">${p.name}</span>
-                        ${p.isAdmin ? '<span class="text-[8px] font-black bg-zinc-800 px-3 py-1 rounded text-zinc-500 uppercase">Мэр</span>' : ''}
-                    </div>
-                `).join('');
-            } else {
-                document.getElementById('lobby-section').classList.add('hidden');
-                document.getElementById('game-section').classList.remove('hidden');
-                document.getElementById('action-panel').classList.remove('hidden');
-                document.getElementById('action-panel').classList.remove('translate-y-full');
-                
-                document.getElementById('main-body').className = state.game.phase === 'night' 
-                    ? 'min-h-screen flex flex-col night-overlay' 
-                    : 'min-h-screen flex flex-col bg-zinc-950';
-
-                const phaseTitles = {
-                    'introduction': 'Знакомство',
-                    'night': 'Ночь',
-                    'discussion': 'Обсуждение',
-                    'day': 'Суд Линча'
-                };
-
-                document.getElementById('phase-text').innerText = phaseTitles[state.game.phase] || state.game.phase;
-                
-                const indicator = document.getElementById('phase-indicator');
-                if (state.game.phase === 'night') {
-                    indicator.className = "w-3 h-3 rounded-full shadow-[0_0_10px] bg-indigo-600 shadow-indigo-500/50";
-                } else {
-                    indicator.className = "w-3 h-3 rounded-full shadow-[0_0_10px] bg-red-600 shadow-red-500/50";
-                }
-
-                document.getElementById('panel-role-name').innerText = me.role;
-                document.getElementById('panel-status').innerText = me.isAlive ? 'В ИГРЕ' : 'МЕРТВ';
-                document.getElementById('panel-status').className = `text-[10px] font-black px-3 py-1 rounded-lg border ${me.isAlive ? 'text-green-500 border-green-900/30' : 'text-red-500 border-red-900/30'}`;
-
-                renderGrid(me);
-                renderActions(me);
-            }
-
-            checkWins();
-        }
-
-        function renderGrid(me) {
-            const grid = document.getElementById('game-grid');
-            grid.innerHTML = state.game.players.map(p => {
-                const isDead = !p.isAlive;
-                const isSpeaker = (state.game.phase === 'introduction' || state.game.phase === 'discussion') && 
-                                 state.game.players[state.game.speakerIndex]?.id === p.id;
-                
-                return `
-                    <div class="player-card p-5 rounded-[2rem] ${isDead ? 'dead' : 'bg-zinc-900/40'} ${isSpeaker ? 'active' : ''}">
-                        <div class="flex flex-col items-center text-center gap-2">
-                            <div class="w-12 h-12 rounded-2xl bg-zinc-950 flex items-center justify-center border border-zinc-800 text-lg">
-                                ${isDead ? '💀' : (p.role === 'Мафия' && me.role === 'Мафия' ? '🍷' : '👤')}
-                            </div>
-                            <span class="text-[11px] font-black uppercase tracking-widest ${p.id === state.userId ? 'text-red-500' : ''}">${p.name}</span>
-                            ${isSpeaker ? '<span class="text-[8px] font-black text-red-700 animate-pulse uppercase tracking-[0.2em]">Говорит...</span>' : ''}
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function renderActions(me) {
-            const container = document.getElementById('panel-actions');
-            const instruct = document.getElementById('panel-instruction');
-            container.innerHTML = '';
-
-            if (!me.isAlive) {
-                instruct.innerText = "Духи не имеют голоса. Ожидайте финала.";
-                return;
-            }
-
-            // РЕЧЬ (Обсуждение или Знакомство)
-            if (['introduction', 'discussion'].includes(state.game.phase)) {
-                const currentSpeaker = state.game.players[state.game.speakerIndex];
-                
-                if (currentSpeaker?.id === state.userId) {
-                    const isIntro = state.game.phase === 'introduction';
-                    
-                    // Генерация сценария для конкретного хода выступления
-                    const scenarioKey = `scenario_${state.game.phase}_${state.game.speakerIndex}`;
-                    if (!window.currentGeneratedScenario || window.lastScenarioKey !== scenarioKey) {
-                        const db = isIntro ? introScenarios : alibiScenarios;
-                        window.currentGeneratedScenario = db[Math.floor(Math.random() * db.length)];
-                        window.lastScenarioKey = scenarioKey;
-                        showScenarioUI = false; // Сбрасываем показ при новом ходе
-                    }
-
-                    if (showScenarioUI) {
-                        // Показываем сам текст сценария
-                        instruct.innerHTML = `
-                            <div class="bg-zinc-950/80 p-3 rounded-xl border border-zinc-800">
-                                <span class="text-[8px] uppercase text-zinc-600 font-black block mb-2 tracking-widest">${isIntro ? 'СЦЕНАРИЙ ЗНАКОМСТВА' : 'ВАША ОТМАЗКА'}</span>
-                                <span class="text-[10px] text-zinc-300 leading-relaxed italic">«${window.currentGeneratedScenario}»</span>
-                            </div>`;
-                        
-                        const btnBack = document.createElement('button');
-                        btnBack.className = "btn-action w-full py-3 bg-zinc-800 text-zinc-400 rounded-xl text-[9px] font-black uppercase tracking-widest";
-                        btnBack.innerText = "Скрыть";
-                        btnBack.onclick = () => { showScenarioUI = false; renderActions(me); };
-                        container.appendChild(btnBack);
-                    } else {
-                        // Основное меню речи
-                        instruct.innerText = isIntro 
-                            ? "Ваш первый день. Расскажите городу, кто вы и чем занимаетесь." 
-                            : "Время обсудить события ночи. Кто кажется вам подозрительным?";
-                        
-                        const btnShow = document.createElement('button');
-                        btnShow.className = "btn-action w-full py-4 bg-red-950/30 border border-red-900/40 text-red-500 rounded-2xl text-[10px] font-black uppercase tracking-widest mb-1";
-                        btnShow.innerText = isIntro ? "Показать мой сценарий" : "Показать мою отмазку";
-                        btnShow.onclick = () => { showScenarioUI = true; renderActions(me); };
-                        container.appendChild(btnShow);
-
-                        const btnFinish = document.createElement('button');
-                        btnFinish.className = "btn-action w-full py-4 bg-indigo-700 text-white rounded-2xl shadow-lg shadow-indigo-900/20 text-[10px] font-black uppercase tracking-widest";
-                        btnFinish.innerText = "Закончить речь";
-                        btnFinish.onclick = window.nextSpeaker;
-                        container.appendChild(btnFinish);
-                    }
-
-                } else {
-                    instruct.innerText = `Внимательно слушайте: ${currentSpeaker?.name}. Не перебивайте выступающего.`;
-                }
-            } 
-            
-            // НОЧНЫЕ ДЕЙСТВИЯ
-            else if (state.game.phase === 'night') {
-                const nextRole = getNextNightRole(state.game);
-                const isSpecialRole = ['Мафия', 'Доктор', 'Детектив'].includes(me.role);
-
-                if (isSpecialRole && nextRole) {
-                    if (me.role === nextRole) {
-                        showPrivateToastOnce(
-                            `role-turn-${state.game.history.length}-${nextRole}`,
-                            `Ваша очередь: ${nextRole}. У вас 60 секунд на действие.`
-                        );
-                    } else {
-                        showPrivateToastOnce(
-                            `role-wait-${state.game.history.length}-${nextRole}`,
-                            `Сейчас действует роль: ${nextRole}. Ожидайте своей очереди.`
-                        );
-                    }
-                }
-
-                if (me.role === nextRole) {
-                    instruct.innerText = me.role === 'Мафия' ? "Выберите жертву этой ночи:" : (me.role === 'Доктор' ? "Кого излечим сегодня?" : "Укажите на того, чью роль хотите узнать:");
-                    
-                    state.game.players.filter(p => p.isAlive).forEach(p => {
-                        const b = document.createElement('button');
-                        b.className = "btn-action w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl text-[10px] font-black uppercase tracking-widest";
-                        b.innerText = p.name;
-                        b.onclick = () => window.act(p.id);
-                        container.appendChild(b);
-                    });
-                } else {
-                    instruct.innerText = "Город спит. Слышны только далекие шаги в темноте...";
-                }
-            } 
-            
-            // ГОЛОСОВАНИЕ
-            else if (state.game.phase === 'day') {
-                if (state.game.votes[state.userId]) {
-                    instruct.innerText = "Ваш голос принят. Ожидание окончательного решения городского совета.";
-                } else {
-                    instruct.innerText = "Выберите того, кто должен покинуть город навсегда:";
-                    state.game.players.filter(p => p.isAlive && p.id !== state.userId).forEach(p => {
-                        const b = document.createElement('button');
-                        b.className = "btn-action w-full py-3 bg-red-950/40 border border-red-900/20 text-red-200 rounded-xl text-[10px] font-black uppercase tracking-widest";
-                        b.innerText = p.name;
-                        b.onclick = () => window.act(p.id);
-                        container.appendChild(b);
-                    });
-
-                    const skipBtn = document.createElement('button');
-                    skipBtn.className = "btn-action w-full py-3 bg-zinc-900 text-zinc-500 rounded-xl text-[10px] font-black uppercase mt-2 tracking-widest";
-                    skipBtn.innerText = "Воздержаться";
-                    skipBtn.onclick = () => window.act('skip');
-                    container.appendChild(skipBtn);
-                }
-            }
-        }
-
-        window.act = async function(targetId) {
-            let game = { ...state.game };
-            const me = game.players.find(p => p.id === state.userId);
-            
-            if (game.phase === 'night') {
-                game.actions[me.role] = targetId;
-                showToast("Действие принято. Ожидайте следующий ход.", "private");
-                
-                if (me.role === 'Детектив') {
-                    const target = game.players.find(p => p.id === targetId);
-                    showToast(`${target.name} - ${target.role === 'Мафия' ? 'МАФИЯ!' : 'Мирный житель'}`, target.role === 'Мафия' ? 'danger' : 'success');
-                }
-
-                const nextRole = getNextNightRole(game);
-
-                if (!nextRole) {
-                    resolveNight(game);
-                } else {
-                    addHistory(game, `Просыпается ${nextRole} и выбирает действие.`);
-                    game.turnEndTime = Date.now() + 60000;
-                    await saveData(game);
-                }
-            } else if (game.phase === 'day') {
-                game.votes[state.userId] = targetId;
-                const aliveCount = game.players.filter(p => p.isAlive).length;
-                if (Object.keys(game.votes).length >= aliveCount) {
-                    window.resolveDay(game);
-                } else {
-                    await saveData(game);
-                }
-            }
-        }
-
-        function resolveNight(game) {
-            const killerChoice = game.actions['Мафия'];
-            const doctorChoice = game.actions['Доктор'];
-            
-            let killedPlayer = null;
-            if (killerChoice && killerChoice !== 'timeout' && killerChoice !== doctorChoice) {
-                killedPlayer = game.players.find(p => p.id === killerChoice);
-                game.players = game.players.map(p => p.id === killerChoice ? { ...p, isAlive: false } : p);
-            }
-
-            if (killedPlayer) {
-                addHistory(game, `Ночь прошла кроваво. Найден мертвым: ${killedPlayer.name}.`);
-            } else {
-                addHistory(game, "Ночь прошла на удивление спокойно. Жертв нет.");
-            }
-
-            game.phase = 'discussion';
-            game.speakerIndex = 0;
-            game.turnEndTime = Date.now() + 60000;
-            game.actions = {};
-            game.votes = {};
-            addHistory(game, "Город просыпается. Начинается обсуждение.");
-            saveData(game);
-        }
-
-        window.resolveNightTimeout = async function(game) {
-            let updated = { ...game };
-            updated.actions = { ...(updated.actions || {}) };
-            const nextRole = getNextNightRole(updated);
-            if (!nextRole) {
-                resolveNight(updated);
-                return;
-            }
-
-            updated.actions[nextRole] = 'timeout';
-            addHistory(updated, `${nextRole} не успел сделать выбор за 60 секунд.`);
-
-            const afterRole = getNextNightRole(updated);
-            if (!afterRole) {
-                resolveNight(updated);
-            } else {
-                addHistory(updated, `Просыпается ${afterRole} и выбирает действие.`);
-                updated.turnEndTime = Date.now() + 60000;
-                await saveData(updated);
-            }
-        }
-
-        window.resolveDay = async function(game) {
-            const voteCounts = {};
-            Object.values(game.votes).forEach(id => {
-                if (id !== 'skip') voteCounts[id] = (voteCounts[id] || 0) + 1;
-            });
-
-            let maxVotes = 0;
-            let candidates = [];
-
-            Object.keys(voteCounts).forEach(id => {
-                if (voteCounts[id] > maxVotes) {
-                    maxVotes = voteCounts[id];
-                    candidates = [id];
-                } else if (voteCounts[id] === maxVotes) {
-                    candidates.push(id);
-                }
-            });
-
-            if (candidates.length === 1) {
-                const target = game.players.find(p => p.id === candidates[0]);
-                game.players = game.players.map(p => p.id === target.id ? { ...p, isAlive: false } : p);
-                addHistory(game, `Городской суд вынес приговор. ${target.name} был изгнан. Его роль: ${target.role}.`);
-            } else {
-                addHistory(game, "Городской совет не пришел к единому мнению. Никто не был наказан.");
-            }
-
-            game.phase = 'night';
-            game.actions = {};
-            game.votes = {};
-            announceNightStart(game);
-            await saveData(game);
-        }
-
-        window.nextSpeaker = async function() {
-            let game = { ...state.game };
-            game.speakerIndex++;
-
-            while (game.speakerIndex < game.players.length && !game.players[game.speakerIndex].isAlive) {
-                game.speakerIndex++;
-            }
-
-            if (game.speakerIndex >= game.players.length) {
-                if (game.phase === 'introduction') {
-                    game.phase = 'night';
-                    addHistory(game, "Знакомство окончено. Город погружается во тьму.");
-                    announceNightStart(game);
-                } else {
-                    game.phase = 'day';
-                    game.turnEndTime = Date.now() + 120000;
-                    addHistory(game, "Обсуждение окончено. Время голосовать.");
-                }
-                game.actions = {};
-                game.votes = {};
-            } else {
-                game.turnEndTime = Date.now() + 60000;
-            }
-            
-            showScenarioUI = false; // Сбрасываем показ сценария при переходе к другому игроку
-            await saveData(game);
-        }
-
-        window.startGame = async function() {
-            let game = { ...state.game };
-            const roles = ['Мафия', 'Доктор', 'Детектив'];
-            while(roles.length < game.players.length) roles.push('Житель');
-            const shuffled = roles.sort(() => Math.random() - 0.5);
-
-            game.players = game.players.map((p, i) => ({ ...p, role: shuffled[i], isAlive: true }));
-            game.phase = 'introduction';
-            game.speakerIndex = 0;
-            game.turnEndTime = Date.now() + 60000;
-            addHistory(game, "Игра началась! Роли распределены.");
-            addHistory(game, "Город проснулся. Время знакомства!");
-            await saveData(game);
-        }
-
-        function checkWins() {
-            if (!state.game || state.game.phase === 'lobby' || document.getElementById('win-overlay').classList.contains('hidden') === false) return;
-            const alive = state.game.players.filter(p => p.isAlive);
-            const mafia = alive.filter(p => p.role === 'Мафия').length;
-            const town = alive.length - mafia;
-
-            if (mafia === 0) end("Город Победил", "Вся мафия была раскрыта и изгнана!");
-            else if (mafia >= town) end("Мафия Победила", "Город пал под властью преступности.");
-        }
-
-        function end(t, d) {
-            document.getElementById('win-title').innerText = t;
-            document.getElementById('win-desc').innerText = d;
-            document.getElementById('win-overlay').classList.remove('hidden');
-        }
-
-        window.resetGame = function() {
-            location.reload();
-        }
-
-        init();
-    </script>
+    <script type="module" src="js/firebase-auth.js"></script>
+    <script type="module" src="js/game.js"></script>
 </body>
-</html> 
+</html>
